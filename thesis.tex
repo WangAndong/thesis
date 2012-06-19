@@ -1,11 +1,15 @@
 %%% This is the master's thesis for William Woodall
 %%%  It is based on the Auburn Thesis template by Chris Wilson
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Document Configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \documentclass[12pt]{report}
-\usepackage{aums}       % For Master's papers
-% \usepackage{auphd}     % For Ph.D.
-% \usepackage{auhonors}  % For honors college
-\usepackage{ulem}       % underlining on style-page; see \normalem below
+\usepackage{aums}        % For Master's papers
+% \usepackage{auphd}       % For Ph.D.
+% \usepackage{auhonors}    % For honors college
+\usepackage{ulem}        % underlining on style-page; see \normalem below
 \usepackage{url}
 \usepackage{tikz}
 \usepackage{pgf}
@@ -14,20 +18,28 @@
 \usepackage{subfig}
 % \usepackage{lineno}  % Inserts line numbers
 
-% \def\linenumberfont{\normalfont\small\sffamily}  % adjust size of line numbers
+% adjust size of line numbers
+% \def\linenumberfont{\normalfont\small\sffamily}
 
-%%%%%Format rules: Normal margins are 1 in. If you need to print with 1.5in margins, uncomment the line below
+%%%%% Format rules: Normal margins are 1 in.
+%%%%% If you need to print with 1.5in margins, uncomment the line below
 % \oddsidemargin0.5in \textwidth6in
 
-%% If you do not need a List of Abbreviations, then comment out the lines below and the \printnomenclature line.
-%% for List of Abbreviations information:  (see http://www.mackichan.com/TECHTALK/509.htm  )
+%% If you do not need a List of Abbreviations,
+%% then comment out the lines below and the \printnomenclature line.
+%% for List of Abbreviations information:
+%%  (see http://www.mackichan.com/TECHTALK/509.htm  )
 \usepackage[intoc]{nomencl}
-\renewcommand{\nomname}{List of Abbreviations}   	       
+\renewcommand{\nomname}{List of Abbreviations}           
 \makenomenclature 
 %% don't forget to run:   makeindex ausample.nlo -s nomencl.ist -o ausample.nls
 
 % May want theorems numbered by chapter
 \newtheorem{theorem}{Theorem}[chapter]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Title Page Configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Put the title, author, and date in. 
 \title{3D Teleoperation with the Microsoft Kinect}
@@ -38,12 +50,11 @@
 \keywords{teleoperation, mapping, robotics, octree, Kinect}
 
 % Put the Thesis Adviser here.
-\adviser{Saâd Biaz}
-
+\adviser{Sa\^{a}d Biaz}
 
 % Put the committee here (including the adviser), one \professor for each. 
 % The advisor must be first, and the dean of the graduate school must be last.
-\professor{Saâd Biaz, Chair, Associate Professor of Computer Science and Software Engineering}
+\professor{Sa\^{a}d Biaz, Chair, Associate Professor of Computer Science and Software Engineering}
 
 \professor{David M. Bevly, Co-Chair, Albert Smith Jr. Professor of Mechanical Engineering}
 
@@ -57,9 +68,17 @@
 
 \TitlePage 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Abstract
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{abstract} 
-This will be an abstract. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
+This thesis investigates the feasibility of using novel three dimensional sensors like the Microsoft Kinect* and the Asus Xtion Pro Live* to assist the teleoperation of mobile vehicles.  Ultimately this work would be applicable to any teleoperated vehicle equipped with sensors providing three dimensional data of the environment, such as an automated ATV with a stereo vision system or a Velodyne LiDAR* system.  The challenges related to utilizing dense three dimensional data in a way that is practical for teleoperation scenarios are identified and solutions are proposed and implemented.  To simplify the approach, the problem is split into three smaller tasks: three dimensional mapping, teleoperation and telemetry visualization, and latency reduction techniques.  The three dimensional mapping pertains to using the three dimensional sensor data in concert with the mobile vehicle navigation solution to generate a three dimensional map of the environment in real-time.  The resulting map must be efficiently sent to the teleoperator and visualized in the teleoperation and telemetry visualization section.  Additionally, latency greatly reduces the teleoperator's ability to drive the vehicle, so methods for reducing the perceived latency are investigated, including using a vehicle model to simulate the vehicle motion in the absence of timely telemetry updates.
 \end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Acknowledgments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{acknowledgments}
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor.
@@ -75,8 +94,11 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincid
 
 \normalem       % Make italics the default for \em
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter: Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Introduction}\label{chap:introduction}	
+\chapter{Introduction}\label{chap:introduction} 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
 
 Praesent adipiscing massa ut sapien pellentesque imperdiet. Sed volutpat viverra tincidunt. Duis dictum convallis magna, tempus facilisis odio hendrerit eu. Quisque nec pharetra turpis. Sed id consequat quam. Maecenas porta dui at ipsum tempus vel malesuada sapien dapibus. Donec eros orci, interdum quis tristique at, mollis eget nisl. Ut vel lorem sem, sit amet tincidunt urna. Quisque faucibus, orci et tempor luctus, diam sapien lacinia velit, id aliquet neque urna ut nunc.
@@ -87,6 +109,9 @@ Duis sed est vitae nibh venenatis ornare. Ut nisi ipsum, ultrices quis pharetra 
 
 Vivamus quis nisl massa, eget suscipit quam. Morbi dictum porta suscipit. Nunc sodales, arcu mollis fermentum malesuada, justo nisi viverra erat, eget lacinia neque velit id mi. Nam mattis, est at bibendum dictum, erat enim blandit elit, sed eleifend lorem lectus a est. Praesent a risus vel sapien venenatis adipiscing sed ut magna. Nam cursus cursus mauris elementum iaculis. Quisque mattis quam eu nunc placerat laoreet.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter: Experimental Results
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Experimental Results}\label{chap:experimental_results}
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
@@ -99,6 +124,9 @@ Duis sed est vitae nibh venenatis ornare. Ut nisi ipsum, ultrices quis pharetra 
 
 Vivamus quis nisl massa, eget suscipit quam. Morbi dictum porta suscipit. Nunc sodales, arcu mollis fermentum malesuada, justo nisi viverra erat, eget lacinia neque velit id mi. Nam mattis, est at bibendum dictum, erat enim blandit elit, sed eleifend lorem lectus a est. Praesent a risus vel sapien venenatis adipiscing sed ut magna. Nam cursus cursus mauris elementum iaculis. Quisque mattis quam eu nunc placerat laoreet.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter: Conclusions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Conclusions}\label{chap:conclusions}
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
