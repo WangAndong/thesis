@@ -1,0 +1,146 @@
+%%% This is the master's thesis for William Woodall
+%%%  It is based on the Auburn Thesis template by Chris Wilson
+
+\documentclass[12pt]{report}
+\usepackage{aums}       % For Master's papers
+% \usepackage{auphd}     % For Ph.D.
+% \usepackage{auhonors}  % For honors college
+\usepackage{ulem}       % underlining on style-page; see \normalem below
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{pgf}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{subfig}
+% \usepackage{lineno}  % Inserts line numbers
+
+% \def\linenumberfont{\normalfont\small\sffamily}  % adjust size of line numbers
+
+%%%%%Format rules: Normal margins are 1 in. If you need to print with 1.5in margins, uncomment the line below
+% \oddsidemargin0.5in \textwidth6in
+
+%% If you do not need a List of Abbreviations, then comment out the lines below and the \printnomenclature line.
+%% for List of Abbreviations information:  (see http://www.mackichan.com/TECHTALK/509.htm  )
+\usepackage[intoc]{nomencl}
+\renewcommand{\nomname}{List of Abbreviations}   	       
+\makenomenclature 
+%% don't forget to run:   makeindex ausample.nlo -s nomencl.ist -o ausample.nls
+
+% May want theorems numbered by chapter
+\newtheorem{theorem}{Theorem}[chapter]
+
+% Put the title, author, and date in. 
+\title{3D Teleoperation with the Microsoft Kinect}
+\author{William J. Woodall IV}
+\date{August 4th, 2012} % date of graduation
+\copyrightyear{2012} % copyright year
+
+\keywords{teleoperation, mapping, robotics, octree, Kinect}
+
+% Put the Thesis Adviser here.
+\adviser{Saâd Biaz}
+
+
+% Put the committee here (including the adviser), one \professor for each. 
+% The advisor must be first, and the dean of the graduate school must be last.
+\professor{Saâd Biaz, Chair, Associate Professor of Computer Science and Software Engineering}
+
+\professor{David M. Bevly, Co-Chair, Albert Smith Jr. Professor of Mechanical Engineering}
+
+\professor{John Y. Hung, Professor of Electrical and Computer Engineering}
+
+\begin{document}
+
+%\linenumbers  % turn on line numbers for editorial needs
+
+\begin{romanpages}      % roman-numbered pages 
+
+\TitlePage 
+
+\begin{abstract} 
+This will be an abstract. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
+\end{abstract}
+
+\begin{acknowledgments}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor.
+\end{acknowledgments}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\printnomenclature[0.5in] %used for the List of Abbreviations
+\end{romanpages}        % All done with roman-numbered pages
+
+
+\normalem       % Make italics the default for \em
+
+
+\chapter{Introduction}\label{chap:introduction}	
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
+
+Praesent adipiscing massa ut sapien pellentesque imperdiet. Sed volutpat viverra tincidunt. Duis dictum convallis magna, tempus facilisis odio hendrerit eu. Quisque nec pharetra turpis. Sed id consequat quam. Maecenas porta dui at ipsum tempus vel malesuada sapien dapibus. Donec eros orci, interdum quis tristique at, mollis eget nisl. Ut vel lorem sem, sit amet tincidunt urna. Quisque faucibus, orci et tempor luctus, diam sapien lacinia velit, id aliquet neque urna ut nunc.
+
+Donec et risus eros. Maecenas convallis lacus sit amet arcu iaculis fermentum. Duis id purus ante, sed lobortis orci. Morbi ultricies massa eget urna accumsan at euismod elit faucibus. Nunc vel mattis sem. Ut magna metus, fermentum id dapibus vel, pellentesque eu mi. Phasellus mollis hendrerit risus, in ullamcorper enim imperdiet eu. Vestibulum quis magna ultrices sapien dapibus euismod. Nam ut lacus sit amet est condimentum gravida id sed libero. In hac habitasse platea dictumst. Suspendisse pretium velit sed ante posuere tempor. Integer sit amet magna et purus sodales laoreet ac vel enim. Sed lorem dui, vulputate quis aliquam non, laoreet eget nulla. Nulla facilisi.
+
+Duis sed est vitae nibh venenatis ornare. Ut nisi ipsum, ultrices quis pharetra vel, mollis a tellus. Nunc egestas lorem ac velit tincidunt at vestibulum dui hendrerit. Proin dolor turpis, tincidunt a lacinia sit amet, varius sit amet dui. In hac habitasse platea dictumst. Nunc vulputate pellentesque suscipit. Fusce lacinia nunc elementum purus posuere facilisis.
+
+Vivamus quis nisl massa, eget suscipit quam. Morbi dictum porta suscipit. Nunc sodales, arcu mollis fermentum malesuada, justo nisi viverra erat, eget lacinia neque velit id mi. Nam mattis, est at bibendum dictum, erat enim blandit elit, sed eleifend lorem lectus a est. Praesent a risus vel sapien venenatis adipiscing sed ut magna. Nam cursus cursus mauris elementum iaculis. Quisque mattis quam eu nunc placerat laoreet.
+
+
+\chapter{Experimental Results}\label{chap:experimental_results}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
+
+Praesent adipiscing massa ut sapien pellentesque imperdiet. Sed volutpat viverra tincidunt. Duis dictum convallis magna, tempus facilisis odio hendrerit eu. Quisque nec pharetra turpis. Sed id consequat quam. Maecenas porta dui at ipsum tempus vel malesuada sapien dapibus. Donec eros orci, interdum quis tristique at, mollis eget nisl. Ut vel lorem sem, sit amet tincidunt urna. Quisque faucibus, orci et tempor luctus, diam sapien lacinia velit, id aliquet neque urna ut nunc.
+
+Donec et risus eros. Maecenas convallis lacus sit amet arcu iaculis fermentum. Duis id purus ante, sed lobortis orci. Morbi ultricies massa eget urna accumsan at euismod elit faucibus. Nunc vel mattis sem. Ut magna metus, fermentum id dapibus vel, pellentesque eu mi. Phasellus mollis hendrerit risus, in ullamcorper enim imperdiet eu. Vestibulum quis magna ultrices sapien dapibus euismod. Nam ut lacus sit amet est condimentum gravida id sed libero. In hac habitasse platea dictumst. Suspendisse pretium velit sed ante posuere tempor. Integer sit amet magna et purus sodales laoreet ac vel enim. Sed lorem dui, vulputate quis aliquam non, laoreet eget nulla. Nulla facilisi.
+
+Duis sed est vitae nibh venenatis ornare. Ut nisi ipsum, ultrices quis pharetra vel, mollis a tellus. Nunc egestas lorem ac velit tincidunt at vestibulum dui hendrerit. Proin dolor turpis, tincidunt a lacinia sit amet, varius sit amet dui. In hac habitasse platea dictumst. Nunc vulputate pellentesque suscipit. Fusce lacinia nunc elementum purus posuere facilisis.
+
+Vivamus quis nisl massa, eget suscipit quam. Morbi dictum porta suscipit. Nunc sodales, arcu mollis fermentum malesuada, justo nisi viverra erat, eget lacinia neque velit id mi. Nam mattis, est at bibendum dictum, erat enim blandit elit, sed eleifend lorem lectus a est. Praesent a risus vel sapien venenatis adipiscing sed ut magna. Nam cursus cursus mauris elementum iaculis. Quisque mattis quam eu nunc placerat laoreet.
+
+
+\chapter{Conclusions}\label{chap:conclusions}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor. Etiam tempor euismod purus vel congue. Curabitur tempor pulvinar nisi ac sodales. Vestibulum vel nulla vitae velit malesuada cursus. Praesent massa nibh, lacinia a pellentesque id, rutrum et nibh. Morbi ipsum ante, interdum at feugiat non, sodales ac ipsum. Duis nec justo a felis convallis commodo id ac sem. Curabitur eu justo tellus, et egestas tellus. Integer viverra odio non odio ultricies faucibus. Quisque id sapien tellus. Praesent sit amet nisi lorem.
+
+Praesent adipiscing massa ut sapien pellentesque imperdiet. Sed volutpat viverra tincidunt. Duis dictum convallis magna, tempus facilisis odio hendrerit eu. Quisque nec pharetra turpis. Sed id consequat quam. Maecenas porta dui at ipsum tempus vel malesuada sapien dapibus. Donec eros orci, interdum quis tristique at, mollis eget nisl. Ut vel lorem sem, sit amet tincidunt urna. Quisque faucibus, orci et tempor luctus, diam sapien lacinia velit, id aliquet neque urna ut nunc.
+
+Donec et risus eros. Maecenas convallis lacus sit amet arcu iaculis fermentum. Duis id purus ante, sed lobortis orci. Morbi ultricies massa eget urna accumsan at euismod elit faucibus. Nunc vel mattis sem. Ut magna metus, fermentum id dapibus vel, pellentesque eu mi. Phasellus mollis hendrerit risus, in ullamcorper enim imperdiet eu. Vestibulum quis magna ultrices sapien dapibus euismod. Nam ut lacus sit amet est condimentum gravida id sed libero. In hac habitasse platea dictumst. Suspendisse pretium velit sed ante posuere tempor. Integer sit amet magna et purus sodales laoreet ac vel enim. Sed lorem dui, vulputate quis aliquam non, laoreet eget nulla. Nulla facilisi.
+
+Duis sed est vitae nibh venenatis ornare. Ut nisi ipsum, ultrices quis pharetra vel, mollis a tellus. Nunc egestas lorem ac velit tincidunt at vestibulum dui hendrerit. Proin dolor turpis, tincidunt a lacinia sit amet, varius sit amet dui. In hac habitasse platea dictumst. Nunc vulputate pellentesque suscipit. Fusce lacinia nunc elementum purus posuere facilisis.
+
+Vivamus quis nisl massa, eget suscipit quam. Morbi dictum porta suscipit. Nunc sodales, arcu mollis fermentum malesuada, justo nisi viverra erat, eget lacinia neque velit id mi. Nam mattis, est at bibendum dictum, erat enim blandit elit, sed eleifend lorem lectus a est. Praesent a risus vel sapien venenatis adipiscing sed ut magna. Nam cursus cursus mauris elementum iaculis. Quisque mattis quam eu nunc placerat laoreet.
+
+
+%If you do not need the List of Abbreviations\nomenclature{LoA}{List of Abbreviations}, comment the nomencl package and associated nomenclature commands. 
+
+
+%%%%%%%%Two options for having a bibliography. If you use a separate file or multiple files:
+
+%%%%% where the files are robotics.bib, imageprocessing.bib and/or thesis.bib. 
+\bibliographystyle{IEEEtran}
+% \bibliography{./references}
+%Or you can include the bibliography entries directly:
+
+\appendix
+\chapter*{Appendices\addcontentsline{toc}{chapter}{Appendices}}
+\chapter{Some C++ Source Code}
+\begin{singlespace}
+\begin{verbatim}
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
+int main(void) {
+  cout << "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+       << "Quisque bibendum tincidunt dolor eget tincidunt. Morbi "
+       << "sagittis cursus vestibulum. Vestibulum vulputate varius "
+       << "tempor." << endl;
+  return 0;
+}
+\end{verbatim}
+\end{singlespace}
+
+\end{document}
+
