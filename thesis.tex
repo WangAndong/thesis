@@ -256,18 +256,15 @@ Figure \ref{fig:variable_hit_miss} shows the effect of long and short ray casts 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Teleoperation}\label{chap:teleoperation}
-This chapter talks about the teleoperation cycle and how it is implemented.
+While the three dimensional map is being continuously generated, the client needs to be updated regularly so that the teleoperator has up-to-date telemetry from which to make decisions about the commands to send to the robotic vehicle. This is where the application of the three dimensional mapping to teleoperation occurs. Periodically the probability octree that represents the current best guess as to the occupancy of the environment is converted to a maximum likelihood tree.  This maximum likelihood tree is compared to the client's map of the environment.  The differences are what needs to be sent over the wire to the client.  The differences are sent to the client where the differences are united with the current client map, effectively updating the map used for visualization.  Iterating these actions in parallel with the three dimensional mapping process allows for timely updates and a gracefully degrading difference model based on available bandwidth.
 
-\section{Teleoperation}
-While the three dimensional map is being continuously generated the client needs to be updated regularly so that the operator has up-to-date telemetry from which to make decisions about the commands to send to the robotic vehicle. This is where the application of the three dimensional mapping to teleoperation occurs. Periodically the probability octree that represents the current best guess as to the occupancy of the environment is converted to a maximum likelihood tree. This tree is differenced with the client's current octree that it is using to visualize the environment. Those differences are sent to the client and the client unions the difference that represent the changes in the environment and the current client octree, thus updating the client map with the new changes. Iterating these actions in parallel with the three dimensional mapping process allows for timely updates and a gracefully degrading difference model based on available bandwidth.
+\section{Maximum Likelihood Representation}
+The point clouds are initially inserted into an occupancy probability octree where the leafs contain the probability of occupation, but this representation is large and not suited for processing and transmitting the map over the wire in a low bandwidth and/or latent network. The map is therefore periodically transformed into a maximum likelihood version of the probabilistic octree. This transformation is performed by applying a probability high pass filter on the probabilistic octree, where the voxels that are most likely occupied are seen in the transformed octree. The maximum likelihood octree is much more compact because each leaf can be represented with exactly two bits each\cite{octomap}.  Two bits per leaf allows for four unique states for each leaf, of which three are utilized, occupied, unoccupied, or unknown.
 
-\subsection{Maximum Likelihood Representation}
-The point clouds are initially inserted into an octree where the leafs contain the probability of occupation, but this representation is large and not suited for processing and transmitting the map over the wire in a low bandwidth and/or latent network. The map is therefore periodically transformed into a maximum likelihood version of the probabilistic octree. This transformation is performed by applying a probability high pass filter on the probabilistic octree, where the voxels that are most likely occupied are seen in the transformed octree. The maximum likelihood octree is much more compact because each leaf can be represented with exactly two bits each.\cite{octomap}  Two bits per leaf allows for four unique states for each leaf, of which three are utilized, occupied, free, or unknown.
+\section{Map Streaming}
+Once the map is in the maximum likelihood tree format, the map needs to be transmitted to the client. It is possible, however, that there is more data to send than there is bandwidth available. In this case a lower resolution version of the map differences can be sent and more detailed differences can be sent in the future when more bandwidth is available.
 
-\subsection{Synchronization Algorithm}
-Once the tree is in the maximum likelihood tree the data needs to be transmitted to the client. It is possible, however, that there is more data to send than there is bandwidth available. In this case a subset of the differences can be sent and more detailed differences can be sent in the future when more bandwidth is available.
-
-\subsubsection{Octree Set Difference}
+\subsection{Octree Set Difference}
 The first step in synchronizing the server and client octrees is to figure out what has changed since the last update. In order to determine this the client octree is set differenced with the server octree which should yield the changes in the server from a previous point in time. In order to find the set difference between the two octrees Algorithm \ref{alg:octree_diff} is used. This algorithm is a simple element wise difference and can be thought of as a volumetric difference.
 
 \begin{algorithm}
@@ -286,17 +283,17 @@ The first step in synchronizing the server and client octrees is to figure out w
 \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Bandwidth Adjustment Algorithm}
-Once the differences have been determined the differences need to be sent over the network to the client computer to be united with the current client map. In the case that there is not enough available bandwidth the differences can be reduced by differencing the two octrees at a lower resolution. The lower resolution versions of the trees can be obtained by limiting the depth of the query into the octree. If the leaf size of the octree is 2 centimeters, then reducing the query depth by one will result in a subtree with leafs of size 4 centimeter, this phenomenon is demonstrated in a map of the Shelby Center at Auburn University by Figure \ref{fig:treedepth}.
+\subsection{Bandwidth Adjustment Algorithm}
+Once the differences have been determined the differences need to be sent over the network to the client computer to be united with the current client map. In the case that there is not enough available bandwidth the differences can be reduced by differencing the two octrees at a lower resolution. The lower resolution versions of the trees can be obtained by limiting the depth of the query into the octree. If the leaf size of the octree is 2 centimeters, then reducing the query depth by one will result in a subtree with leafs of size 4 centimeter, this phenomenon is demonstrated in a map of the Shelby Center at Auburn University by Figure \ref{fig:treedepth}.  The visualization in Figure \ref{fig:treedepth} was done using octovis\cite{octomap}, which is part of octomap.
 
-\begin{figure*}[!ht]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=6.5in,keepaspectratio]{ShelbySE_2f_combined_octovis.png}
   \caption{Partial map of a hallway showing the effect of limiting the query 
            depth.  From left to right the resolution is 0.05m, 0.1m, 0.2m,
            and 0.4m.}
   \label{fig:treedepth}
-\end{figure*}
+\end{figure}
 
 The algorithm for selecting the depth is proposed in Algorithm \ref{alg:bandwidth} and simply continues to degrade the resolution until there is enough bandwidth to transmit or until there resolution cannot be degraded further.
 
@@ -324,28 +321,10 @@ The algorithm for selecting the depth is proposed in Algorithm \ref{alg:bandwidt
 \end{algorithmic}
 \end{algorithm}
 
-The depth function simply returns a subtree of the given tree at the height given, and the height function gives the height of the tree specified.  The resolution function simply returns the dimension of a leaf at the given level.  The current available bandwidth function could be implemented in several ways, but the topic of available bandwidth estimation has been covered in the literature.\cite{prasad2003bandwidth} The principal behind the bandwidth estimation is looking at metrics like round-trip-time, average delay, packet loss, and throughput to determine the bandwidth currently available.
+The depth function simply returns a subtree of the given tree at the height given, and the height function gives the height of the tree specified.  The resolution function simply returns the dimension of a leaf at the given level.  The current available bandwidth function could be implemented in several ways, but the topic of available bandwidth estimation has been covered in the literature.\cite{prasad2003bandwidth} The principal behind the bandwidth estimation is looking at metrics like round-trip-time, average delay, packet loss, and throughput to determine the bandwidth currently available.  During testing the bandwidth will be artificially controlled to exercise this component of the system.  Artificially controlling the bandwidth used by the mapping system will also allow for quality of service to be enforced on it.  This would allow the system to prioritize things like teleoperation commands, video, or other telemetry over the map update.
 
-\subsubsection{Octree Set Union}
+\subsection{Octree Set Union}
 The final stage of synchronizing the server and client octrees is to unite the differences with the client octree. This is just a simple union operation and can be performed by simply inserting every voxel of the differences into the client map using the normal octree insertion method.\cite{meagher1982geometric}
-
-\section{Map Streaming}
-Talk about the map streaming system.
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{|r|l|}
-  \hline
-  7C0 & hexadecimal \\
-  3700 & octal \\ \cline{2-2}
-  11111000000 & binary \\
-  \hline \hline
-  1984 & decimal \\
-  \hline
-\end{tabular}
-\caption{This table shows some data}
-\label{tab:myfirsttable}
-\end{table}
 
 \section{Visualization}
 Talk about the map visualization.
