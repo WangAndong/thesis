@@ -189,15 +189,29 @@ Very recent work by Microsoft using the Kinect has achieved real-time mapping wi
 \label{sec:3dmapping}
 This section describes the process of combining the three dimensional data from the sensor and six dimensional poses from the robot base into three dimensional maps of the environment. As previously mentioned in Section \ref{sec:previouswork_3dmapping}, A. Hornung, et. al. have already shown that octrees combined with a probabilistic insertion method can provide a good solution when creating three dimensional maps in this manner. A portion of this section is just explaining their work and how it is used in the teleoperation system described in this thesis work.\cite{octomap} The obvious first steps of this process is obtaining the three dimensional data and the six dimensional pose of the robotic base from which the map is constructed, but these are described briefly in Section \ref{sec:experimental_setup}.
 
-\subsection{Transforming the Point Clouds}
-Each time new data from the three dimensional sensor is received by the computer the data needs to be transformed into a common arbitrary global frame or `map' frame. Figure \ref{fig:transforms} shows a typical transformation tree for the robotic setup. The `base\textunderscore{}link' frame is commonly referred to as the vehicle frame. The transformation between the `map' frame and the `base\textunderscore{}link' frame represents absolute transformation given by robotic vehicle's pose estimate. The transformations between the `base\textunderscore{}link' frame and the `laser\textunderscore{}link' frame and the `camera\textunderscore{}link' frame are static geometric relationships and represent the position of the sensors on the robot chassis. When new point clouds are receive they are in the `camera\textunderscore{}link' coordinate frame and need to be converted into the `map' coordinate frame as that is the corrected global frame in this situation.
-
 \begin{figure}[ht]
   \centering
   \includegraphics[width=5in,keepaspectratio]{transforms.pdf}
   \caption{Typical Coordinate Transform Tree}
   \label{fig:transforms}
 \end{figure}
+
+\subsection{Transforming the Point Clouds}
+Each time new data from the three dimensional sensor is received by the computer the data needs to be transformed into a common arbitrary global frame or `map' frame. Figure \ref{fig:transforms} shows a typical transformation tree for the robotic setup. The `base\textunderscore{}link' frame is commonly referred to as the vehicle frame. The transformation between the `map' frame and the `base\textunderscore{}link' frame represents absolute transformation given by robotic vehicle's pose estimate. The transformations between the `base\textunderscore{}link' frame and the `laser\textunderscore{}link' frame and the `camera\textunderscore{}link' frame are static geometric relationships and represent the position of the sensors on the robot chassis. When new point clouds are receive they are in the `camera\textunderscore{}link' coordinate frame and need to be converted into the `map' coordinate frame as that is the corrected global frame in this situation.
+
+In order to transform the point clouds into the global coordinate frame, each point in the point cloud must be transformed into the global coordinate frame.  Each point is represented by the vector in Equation \ref{eq:point}.
+
+\begin{equation} \label{eq:point}
+\left[ \begin{array}{c} x \\ y \\ z \\ 1 \end{array} \right]
+\end{equation}
+
+This is done using the homogeneous transform matrix\cite{lavalle2006planning}, defined in Equation \ref{eq:transform_matrix}.  In the homogeneous transform matrix $\gamma$ is Roll about the $x$ axis, $\beta$ is pitch about the $y$ axis, and $\alpha$ is Yaw about the $z$ axis.  $x_{t}$, $y_{t}$, and $z_{t}$ are the translational components of the transform matrix.
+
+\begin{equation} \label{eq:transform_matrix}
+\left[ \begin{array}{cccc} \cos \alpha \cdot \cos \beta  & \cos \alpha \cdot \sin \beta \cdot \sin \gamma \; -\; \sin \alpha \cdot \cos \gamma  & \cos \alpha \cdot \sin \beta \cdot \cos \gamma \; +\; \sin \alpha \cdot \sin \gamma  & x_{t} \\ \sin \alpha \cdot \cos \beta  & \sin \alpha \cdot \sin \beta \cdot \sin \gamma \; +\; \cos \alpha \cdot \cos \gamma  & \sin \alpha \cdot \sin \beta \cdot \cos \gamma \; -\; \cos \alpha \cdot \sin \gamma  & y_{t} \\ -\sin \beta  & \cos \beta \cdot \sin \gamma  & \cos \beta \cdot \cos \gamma & z_{t} \\ 0 & 0 & 0 & 1 \end{array} \right]
+\end{equation}
+
+By multiplying each of the points in the point cloud by this transform matrix, the entire point cloud is transformed into the global coordinate frame is ready to be inserted into the map.
 
 \subsection{Inserting New Data}
 Once the point cloud data has been transformed into the global coordinate frame the data needs to be added to the map. As previously mentioned, this is done by the octomap library, but the process is described here for clarity. The underlying data structure for this map is an octree where each leaf has a probability of occupation. This in effect is a three dimensional occupancy grid with octree storage where each leaf of the tree is a voxel in the grid. The transformed data and the origin of the sensor in the global coordinate frame are required for the insertion. The insertion method starts by iteratively ray tracing from the origin of the sensor to each data point in the point cloud.  For each voxel that the ray trace passes through the probability of occupation of for that voxel is decreased by a given amount. For the voxel that the ray trace ends in the probability of that voxel being occupied is increased by a given amount. In this way it takes several points falling into a voxel to have voxel considered to be occupied and allows for fringe voxels caused by noise to be cleared by additional new data.
@@ -209,7 +223,7 @@ Once the point cloud data has been transformed into the global coordinate frame 
   \label{fig:voxel_raytrace}
 \end{figure}
 
-Figure \ref{fig:voxel_raytrace} shows this process in a two dimensional example where the gray voxels are the robot, the red dot is the sensor origin, the black dot is the point from the point cloud, the green voxels are having their occupancy decreased, and the red voxel is having its occupancy increased. This method of voxel ray tracing is originally proposed by Amanatides, J. and Woo, A., and is referenced in the octomap paper.\cite{amanatides1987fast}
+Figure \ref{fig:voxel_raytrace} shows this process in a two dimensional example where the gray voxels are the robot, the red dot is the sensor origin, the black dot is the point from the point cloud, the green voxels are having their occupancy decreased, and the red voxel is having its occupancy increased. This method of voxel ray tracing is originally proposed by Amanatides, J. and Woo, A., and is referenced in the octomap paper\cite{amanatides1987fast}.
 
 \section{Sources of Error During Three Dimensional Mapping}
 With this approach to three dimensional mapping, map quality can be adversely affected by several different sources of error, including the uncertainty in the pose estimate of the robotic vehicle, random and systematic error in the three dimensional data, and systematic errors due to timing and geometric misalignment.  Figure \ref{fig:slamvsoctree} shows the resulting octree map with the map from the Simultaneous Localization and Mapping (SLAM) algorithm, which is good enough in this instance to be considered truth. The octree map generally lines up with the SLAM map but has a lot of areas where the result is less than desirable.
@@ -222,7 +236,7 @@ With this approach to three dimensional mapping, map quality can be adversely af
 \end{figure}
 
 \subsection{Vehicle Pose Uncertainty}
-A major component of the error introduced in mapping with this system is the vehicle pose uncertainty.  In the proposed system, but generally in any system, you have an estimate of your position and orientation, which is generally a combination of multiple sensors or observations and therefore you will often have a grow-bound cycle in the pose estimate uncertainty.  In the proposed system this occurs when a SLAM update occurs.  The SLAM algorithm provides updates to the pose of the vehicle at about 1 Hz, so between these updates the integrated wheel odometry is used to provide poses.  The integrated wheel odometry quickly diverges from the true path of the vehicle and the uncertainty grows quickly, especially when turning in place where the non-linear effects of slip are ignored in the integration of the encoders.  Therefore the uncertainty grows and then is sharply snapped back on a SLAM update.  This effect can be seen in Figure~\ref{fig:uncertainty}, where the mis alignment of the laser data and the map becomes obvious, and then after a SLAM update the pose estimate is much better.  This behavior presents a problem in the mapping, by inserting a point cloud just before the SLAM update the point cloud transform into the map frame is going to be at its worst.
+A major component of the error introduced in mapping with this system is the vehicle pose uncertainty.  In the proposed system, but generally in any system, you have an estimate of your position and orientation, which is generally a combination of multiple sensors or observations and therefore you will often have a grow-bound cycle in the pose estimate uncertainty.  In the proposed system this occurs when a SLAM update occurs.  The SLAM algorithm provides updates to the pose of the vehicle at about 1 Hz, so between these updates the integrated wheel odometry is used to provide poses.  The integrated wheel odometry quickly diverges from the true path of the vehicle and the uncertainty grows quickly, especially when turning in place where the non-linear effects of slip are ignored in the integration of the encoders.  Therefore the uncertainty grows and then is sharply snapped back on a SLAM update.  This effect can be seen in Figure \ref{fig:uncertainty}, where the mis alignment of the laser data and the map becomes obvious, and then after a SLAM update the pose estimate is much better.  This behavior presents a problem in the mapping, by inserting a point cloud just before the SLAM update the point cloud transform into the map frame is going to be at its worst.
 
 \begin{figure}[ht]
   \centering
@@ -312,7 +326,7 @@ The algorithm for selecting the depth is proposed in Algorithm \ref{alg:bandwidt
   \REPEAT
     \STATE $O_0 \prime = depth(O_0,height(O_0)-i)$
     \STATE $O_1 \prime = depth(O_1,height(O_1)-i)$
-    \STATE $d = O_0 \prime \bigcup O_1 \prime $
+    \STATE $d = O_0 \prime \cup O_1 \prime $
     \STATE $B_d = size(d) / T_u$
     \STATE $B_a = currentAvailableBandwidth()$
     \STATE $i = i + 1$
@@ -327,10 +341,49 @@ The depth function simply returns a subtree of the given tree at the height give
 The final stage of synchronizing the server and client octrees is to unite the differences with the client octree. This is just a simple union operation and can be performed by simply inserting every voxel of the differences into the client map using the normal octree insertion method.\cite{meagher1982geometric}
 
 \section{Visualization}
-Talk about the map visualization.
+The purpose of mapping the environment and stream that map to the client is so that the teleoperator might gain some improvement of control when teleoperating the robotic vehicle.  In addition to the map being sent to the client, the robotic vehicle's position in the map's coordinate frame must be sent to the client as well.  With these two pieces of information the visualization of the vehicle in the three dimensional environment is possible.
+
+\subsection{Rviz}
+Rviz\cite{rviz} is a visual debugging tool provided by the Robotic Operating System (ROS)\cite{quigley2009ros}.  ROS is used at large in the experimental implementation of this system.  Rviz provides interfaces to visualize generic data types commonly found in robotics, like point clouds, laser scans, odometry, transforms, and others.  In addition to these generic data formats, it allows for more general drawing programmatically using primitive shapes like cylinders, spheres, boxes, and points.  More advanced shapes and custom shapes are also allowed.  This is can be seen in Figure \ref{fig:rviz_shapes}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=6.5in,keepaspectratio]{rviz_shapes.png}
+  \caption{Demo of drawing types in rviz. [http://www.ros.org/wiki/rviz/DisplayTypes/Marker]}
+  \label{fig:rviz_shapes}
+\end{figure}
+
+Since the underlying system is already using ROS and rviz provides methods for drawing custom three dimensional information, rviz was chosen as the basis for the visualization system.
+
+\subsection{Rendering the Map}
+In order to visualize or render the map using rviz, the map data must be put into a format that rviz supports.  There is no standard data type that satisfies the display of an octree.  Though each leaf of the octree could be represented as a point in a point cloud, each leaf also can have different sizes, i.e. not all leaves in the octree are the lowest depth of the tree.  Therefore custom drawing tools are required for drawing the octree correctly.
+
+For efficiency in drawing, one of the custom drawing types is a `cube list', in contrast to just a `cube'.  In a cube list, a single message is sent to rviz which is of type `cube list' and has an array of positions and colors for each cube in the list.  This is far more efficient than sending a message to rviz for each leaf in the octree.  Each cube in a cube list, however, must be the same size.  Therefore, there must be a cube list for each level of the octree.
+
+\begin{algorithm}
+\caption{Algorithm for Drawing an Octree in Rviz}
+\label{alg:octree_rviz}
+\begin{algorithmic}
+  \STATE \COMMENT {$O$ is the client map octree}
+  \STATE \COMMENT {$cubelists$ is an array of leaf sets})
+  \FOR{$leaf$ in $leaves(O)$}
+    \STATE $cubelists\{size(leaf)\} = cubelists\{size(leaf)\} \cap leaf$
+  \ENDFOR
+  \FOR{$i=0$ to $height(O)$}
+    \STATE $sendCubeList(cubelists\{i\}, size(cubelists\{i\}\{0\}))$
+  \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+The algorithm for drawing an octree in rviz is displayed in Algorithm \ref{alg:octree_rviz}.  In the algorithm the $leaves$ function returns an array of the leaves in the given octree, the $size$ function returns the dimensions of the voxel represented by a given leaf, and the $sendCubeList$ function sends the given set of leaves to rviz to be rendered at the given size.  This algorithm sorts the leaves of the octree into sets by height.  Then each set of leaves can be sent as one `cube list' of the appropriate size for that height to be rendered in rviz.
+
+\subsection{Coloring the Octree}
+When rendering the octree, there are a few options on how to color them.  One obvious option is to make all the leaves the same flat color.  This makes it difficult to see the three dimensional structure, so it is not used.  Another option is to color the voxels of the octree by height in the global coordinate frame.  This gives some context to the voxels, where the lowest to the ground voxels will be one color and voxels near the ceiling will be a different color.  This is the most effective method of rendering the voxels such that the teleoperator can understand the three dimensional structure.
+
+Another option is to color the voxels by the color they would have in the real environment.  This requires that the system provides color per point in the incoming point clouds, which the Kinect and Xtion Pro Live do.  This information is stored in the octree as an average of the colors of points that raytraced to each leaf.  This representation can add a more photo realistic quality to the environment for the teleoperator, but consumes additional bandwidth and does not render well when the map is at a low resolution.
 
 \section{Teleoperator Input}
-Talk about the interface for the teleoperator to control the vehicle.
+The final responsibility of the teleoperation subsystem is collect the input from the teleoperator and transmit this to the robotic vehicle.  This is achieved using a Human Interface Device (HID) like a gamepad or a joystick.  In addition to a gamepad or joystick, a more vehicle like system could be used like a steering wheel and pedals.  The input from one of these devices is mapped to linear and angular velocities appropriate for the vehicle being teleoperated.  These linear and angular velocities are sent to the robotic vehicle when they are executed by that subsystem.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Latency Reduction
