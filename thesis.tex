@@ -37,7 +37,7 @@
 %% If you do not need a List of Abbreviations,
 %% then comment out the lines below and the \printnomenclature line.
 %% for List of Abbreviations information:
-%%  (see http://www.mackichan.com/TECHTALK/509.htm  )
+%%  (see http://www.Mackinac.com/TECHTALK/509.htm  )
 \usepackage[intoc]{nomencl}
 \renewcommand{\nomname}{List of Abbreviations}           
 \makenomenclature 
@@ -90,7 +90,8 @@ This thesis investigates the feasibility of using novel three dimensional sensor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{acknowledgments}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque bibendum tincidunt dolor eget tincidunt. Morbi sagittis cursus vestibulum. Vestibulum vulputate varius tempor.
+Acknowledge people here.
+% TODO: this
 \end{acknowledgments}
 
 \tableofcontents
@@ -131,10 +132,11 @@ Before jumping into the system design, previous work in related projects was sur
 
 There are several groups that have previously aimed to provide a more photo realistic three dimensional environment in order to improve teleoperation scenarios.  In particular Huber, et. al. from Carnegie Mellon University describe a system with a multi faceted approach to representing the environment in three dimensional space\cite{photo_real}.  Their system showed that it was possible to achieve a high level of fidelity when representing the environment.  They employed several techniques to reconstruct the environment including billboards, voxel grids, point clouds, and ground plane estimation and modeling.  Additionally, they showed that their system improved teleoperation of automated vehicles and they characterized the affects of latency on the teleoperators.  What their work did not address was the problems of processing or bandwidth.  Their system had an umbilical fiber optic cable to transmit the telemetry back to an on site trailer where the telemetry was converted into the three dimensional components using a rack of several servers.  Therefore, one of th goals of this thesis is to address some of those concerns by simplifying the representation of the three dimensional environment and by leveraging different storage structures and methodologies when building the map and transmitting it to the teleoperator.
 
-\section{Problem Statement}
+\section{Problem Statement and Requirements Analysis}
 The system should take telemetry from the robotic vehicle, and use it to produce a visually accurate three dimensional map of the vehicle's environment.  The resulting map should be displayed to the user, also known as the teleoperator, and the user's input should be used to control the robotic vehicle.  The robot's telemetry should include both proprioceptive data which will provide information about the location of the vehicle in its environment and exteroceptive data which provides three dimensional data about the environment.  By combining these two types of data a three dimensional model of the vehicle is placed in a reconstruction of the environment and is displayed to the teleoperator.  The mechanism by which the reconstructed environment is transmitted to the teleoperator must work in low bandwidth and high latency networks.
 
-The system design follows from the problem statement as a system of systems in a client-server architecture.  The system can clearly be divided into a robotic vehicle subsystem, a three dimensional mapping subsystem, and a teleoperation subsystem.  The robotic vehicle subsystem can be abstracted and therefore decoupled from the mapping and teleoperation subsystems.  The three dimensional mapping system takes the abstracted telemetry from the robotic vehicle with which it maintains a three dimensional map of the environment.  This map is then provided to the teleoperation system which transmits the map and visualizes it for the teleoperator.  Additionally the teleoperation subsystem takes the user input which is communicated to the robotic vehicles abstracted command interface, again decoupling it from the other subsystems.  The teleoperator, and his machine, can be viewed as the client and the robotic vehicle is the server which provides processed telemetry and executes input from the teleoperator.  A high level diagram of the system is seen in figure \ref{fig:subsystem}.
+\subsection{System of Systems Architecture}
+The system design follows from the problem statement and the requirements analysis as a system of systems in a client-server architecture.  The system can clearly be divided into a robotic vehicle subsystem, a three dimensional mapping subsystem, and a teleoperation subsystem.  The robotic vehicle subsystem can be abstracted and therefore decoupled from the mapping and teleoperation subsystems.  The three dimensional mapping system takes the abstracted telemetry from the robotic vehicle with which it maintains a three dimensional map of the environment.  This map is then provided to the teleoperation system which transmits the map and visualizes it for the teleoperator.  Additionally the teleoperation subsystem takes the user input which is communicated to the robotic vehicles abstracted command interface, again decoupling it from the other subsystems.  The teleoperator, and his machine, can be viewed as the client and the robotic vehicle is the server which provides processed telemetry and executes input from the teleoperator.  A high level diagram of the system is seen in figure \ref{fig:subsystem}.
 
 \begin{figure}[ht]
   \centering
@@ -147,8 +149,8 @@ An assumption about the design is made in the above paragraph.  The assumption i
 
 By decoupling the three subsystems, it makes replacing one implementation of a subsystem with another much easier.  Because the robotic vehicle's interfaces consist of one or more exteroceptive sensors, a proprioceptive pose solution, and a velocity command interface, the underlying robotic vehicle can be replaced with any robotic subsystem that can conform to that interface.  Similarly, the mapping subsystem can be replaced with any individual mapping system that takes the telemetry from the robotic vehicle and produces a map for the teleoperation subsystem.
 
-\section{System Specification}  %% TODO: This is where I left off...
-The teleoperation of robotic vehicles implies a client-server architecture where one machine controls the vehicle and collects the telemetry, and another machine has the operator which visualizes the telemetry and generates commands for the machine.  In the simplest case a robot, or server, has proprioceptive and exteroception sensors with which to locate itself and observe the environment, and communicates this telemetry to an operator's computer, or client, which visualize the telemetry and transmits user commands back to the server.
+\section{System Specification}
+Breaking the subsystems down further, implementation specific details begin to come to light.  Figure \ref{fig:system_diagram} shows the three subsystems in more detail and more tightly integrated.  Thought the interfaces are missing here the flow of information remains the same from the subsystem layout in Figure \ref{fig:subsystem}.
 
 \begin{figure}[ht]
   \centering
@@ -157,10 +159,12 @@ The teleoperation of robotic vehicles implies a client-server architecture where
   \label{fig:system_diagram}
 \end{figure}
 
-Figure~\ref{fig:system_diagram} describes the overall system design.  The three dimensional point clouds collected from a sensor, like the Microsoft Kinect, are combined with a navigation solution from the robotic base to transform the data points into a common map frame.  At this point the point clouds are inserted into the map using octomap's probabilistic insertion method.  A maximum likelihood version of the map is generated using octomap and is stored as what this paper will refer to as the server map.  At this point the map is ready to be used in teleoperation, so the server map is subtracted from the map that the client current has, referred to as the client map.  The differences, or part of the differences, are sent to the client and united with the current client map.  If all of the differences are sent, then the client map and the server map should then be synchronized, otherwise successive iterations of this process will eventually result in an up-to-date client map.
+As mentioned above Figure \ref{fig:system_diagram} describes the overall system design.  The three dimensional data in the form of point clouds are collected from one or more sensors, like the Microsoft Kinect.  These point clouds are combined with a navigation solution from the robotic base to transform the data points into a common map coordinate frame.  At this point the point clouds are inserted into the map using a probabilistic insertion method which is described in Chapter \ref{chap:3d_mapping}.  A maximum likelihood version of the map is generated and is stored in, what this work will refer to as, the server map.  At this point the map is ready to be used in teleoperation, so the server map is subtracted from the map that the client current has, referred to as the client map.  The differences, or part of the differences, are sent to the client and united with the current client map.  If all of the differences are sent, then the client map and the server map should then be synchronized, otherwise successive iterations of this process will eventually result in an up-to-date client map.  Simultaneously, input from the teleoperator is being sent to the robotic vehicle to allow teleoperation.
+
+The above description, or theory of operation, of the system makes references to several, as yet, undefined processes and design decisions.  There are more details on the Mapping and Teleoperation subsystems in Chapters \ref{chap:3d_mapping} and \ref{chap:teleoperation}, respectively.  The robotic subsystem and it's fore mentioned navigation solution are discussed in the next section and the Experimental Setup in Section \ref{sec:experimental_setup}.
 
 \section{Robot Navigation}
-A necessary component of the proposed teleoperation system is the ability for the robotic vehicle to provide an accurate pose estimate.  Because the system proposed does not rely on ICP or feature mapping to combine successive point clouds, as in P. Henry, M. Krainin, and E. Herbst\cite{Henry2010}, the pose estimate from the robotic vehicle must be very accurate.  The trade off is that a much smaller amount of processing is required to generate the map, but the resulting quality of the map is sensitive to errors in the pose estimate.  Outdoor navigation systems like the Novatel SPAN series can provide \textasciitilde2cm positional accuracy and 1/10th degree angular accuracy, which would be acceptable.  Indoor robots, like the experimental setup for this paper, require some other means of estimating its position in a map coordinate frame.  The experimental system in this paper does SLAM by combining odometry from the wheel encoders with laser range finder data from a Sick LMS151.  An off-the-shelf SLAM library is used to get a high quality pose estimate indoors, and it uses a grid based approach with particle filters to map and localize on the environment.  The library used is called the gmapping library\cite{grisetti2007improved}\cite{grisettiyz2005improving}, which is an open source library and can be found on openslam.org.
+A necessary component of the proposed teleoperation system is the ability for the robotic vehicle to provide an accurate pose estimate.  Because the system proposed does not rely on ICP or feature mapping to combine successive point clouds, as in P. Henry, M. Krainin, and E. Herbst\cite{Henry2010}, the pose estimate from the robotic vehicle must be very accurate.  The trade off is that a much smaller amount of processing is required to generate the map, but the resulting quality of the map is sensitive to errors in the pose estimate.  Outdoor navigation systems like the Novatel SPAN system can provide \textasciitilde2 centimeters positional accuracy and 1/10th degree angular accuracy\cite{kennedy2006architecture}, which would be acceptable.  Indoor robots, like the experimental setup for this paper, require some other means of estimating its position in an arbitrary global coordinate frame.  The experimental system in this work uses an implementation of grid SLAM, which combines odometry from the wheel encoders with laser range finder data from a Sick LMS151.  An off-the-shelf SLAM library is used to get a high quality pose estimate indoors, and it uses a grid based approach with particle filters to map and localize on the environment.  The library used is called the gmapping library\cite{grisetti2007improved}\cite{grisettiyz2005improving}, which is an open source library and can be found on openslam.org.  This gives a high accuracy, drift free pose solution of the vehicle indoors.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Three Dimensional Mapping
@@ -171,7 +175,7 @@ As with the top level system design, previous mapping solutions are analyzed bef
 
 \section{Previous Work}
 \label{sec:previouswork_3dmapping}
-Recent work has been done to create three dimensional maps of the environment using octree's and a probabilistic insertion method that is well suited for robotic activities where there is noise in the data and uncertainty in the pose of the robot. A. Hornung, et. al. described and implemented this system and it resulted in an open-source library called octomap.\cite{octomap} This paper uses octomap as the octree mapping system and exactly how that works is described in section \ref{sec:3dmapping}.  There are two main elements of the octomap research that are useful in a three dimensional teleoperation system.
+Recent work has been done to create three dimensional maps of the environment using octrees and a probabilistic insertion method that is well suited for robotic activities where there is noise in the data and uncertainty in the pose of the robot. A. Hornung, et. al. described and implemented this system and it resulted in an open-source library called octomap.\cite{octomap} This paper uses octomap as the octree mapping system and exactly how that works is described in section \ref{sec:3dmapping}.  There are two main elements of the octomap research that are useful in a three dimensional teleoperation system.
 
 First, the probabilistic method for adding new three dimensional information to the map is ideal for a system that needs to be updated continuously.  Uncertainty from the navigation solution will result in point clouds that are transformed slightly incorrect, and this causes inconsistencies and skews in the resulting map. The probabilistic manner in which the scans are inserted into the octree help to alleviate this inconsistency by allowing for some error in the point clouds in relation to map. This is further alleviated by the nature of the octree data structure, because inserting the point clouds into the octree essentially results in a down sampling of the original data to the resolution of the octree.
 
@@ -181,26 +185,26 @@ In addition to the work done by A. Hornung, et. al. with octomap, three dimensio
 
 Very recent work by Microsoft using the Kinect has achieved real-time mapping with the Kinect in a project called KinectFusion\cite{izadi2011kinectfusion}.  Additional work has seen this technology demo reproduced using PCL and extended spatially\cite{whelankintinuous}.  This technique employs new methods for combining Kinect data on the Graphics Processing Unit of the computer's video card.  This technology is very young, but most likely will be a suitable replacement for the mapping system presented in this work.  The only benefit to the mapping system presented in this work is that it still requires far less processing than the KinectFusion system.
 
-\section{Three Dimensional Mapping}
+\section{The Mapping Process}
 \label{sec:3dmapping}
-This section describes the process of combining the three dimensional data from the sensor and six dimensional poses from the robot base into three dimensional maps of the environment. As previously mentioned in Section \ref{sec:previouswork_3dmapping} A. Hornung, et. al. have already shown that octrees combined with a probabilistic insertion method can provide a good solution when creating three dimensional maps in this manner. A majority of this section is just explaining their work and how it is used in the teleoperation system described in this paper.\cite{octomap} The obvious first steps of this process is obtaining the three dimensional data and the six dimensional pose of the robotic base from which the map is constructed, but these are described briefly in Section \ref{sec:experimental_setup}.
+This section describes the process of combining the three dimensional data from the sensor and six dimensional poses from the robot base into three dimensional maps of the environment. As previously mentioned in Section \ref{sec:previouswork_3dmapping}, A. Hornung, et. al. have already shown that octrees combined with a probabilistic insertion method can provide a good solution when creating three dimensional maps in this manner. A portion of this section is just explaining their work and how it is used in the teleoperation system described in this thesis work.\cite{octomap} The obvious first steps of this process is obtaining the three dimensional data and the six dimensional pose of the robotic base from which the map is constructed, but these are described briefly in Section \ref{sec:experimental_setup}.
 
 \subsection{Transforming the Point Clouds}
-Each time new data from the three dimensional sensor is received by the robot computer the data needs to be transformed into a common map frame. Figure \ref{fig:transforms} shows a typical transformation tree for the robotic setup. The transformation between the map coordinate frame and the odom coordinate frame represents the accumulated error from the odometry of the robot that has been corrected by the SLAM algorithm. The transformation between the odom frame and the base\textunderscore{}link frame represents absolute transformation given by integrating odometry measurements over time. The transforms between the base\textunderscore{}link frame and the laser\textunderscore{}link frame and the openni\textunderscore{}camera frame are static geometric relationships and represent the position of the sensors on the robot chassis. When new point clouds are receive they are in the openni\textunderscore{}camera coordinate frame and need to be converted into the map coordinate frame as that is the corrected global frame in this situation.
+Each time new data from the three dimensional sensor is received by the computer the data needs to be transformed into a common arbitrary global frame or `map' frame. Figure \ref{fig:transforms} shows a typical transformation tree for the robotic setup. The `base\textunderscore{}link' frame is commonly referred to as the vehicle frame. The transformation between the `map' frame and the `base\textunderscore{}link' frame represents absolute transformation given by robotic vehicle's pose estimate. The transformations between the `base\textunderscore{}link' frame and the `laser\textunderscore{}link' frame and the `camera\textunderscore{}link' frame are static geometric relationships and represent the position of the sensors on the robot chassis. When new point clouds are receive they are in the `camera\textunderscore{}link' coordinate frame and need to be converted into the `map' coordinate frame as that is the corrected global frame in this situation.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=3.5in,keepaspectratio]{transform.pdf}
+  \includegraphics[width=5in,keepaspectratio]{transforms.pdf}
   \caption{Typical Coordinate Transform Tree}
   \label{fig:transforms}
 \end{figure}
 
 \subsection{Inserting New Data}
-Once the point cloud data has been transformed into the global map coordinate frame the data needs to be added to the map. This is done by the octomap library, but I will describe the process here. The underlying data structure for this map is an octree where each leaf has a probability of occupation. This in effect is a three dimensional occupancy grid with octree storage where each leaf of the tree is a voxel in the grid. The transformed data and the origin of the sensor in the global map coordinate frame are required for the insertion. The insertion method starts by iteratively ray tracing from the origin of the sensor to each data point in the point cloud.  For each voxel that the ray trace passes through the probability of occupation of for that voxel is decreased by a given amount. For the voxel that the ray trace ends in the probability of that voxel being occupied is increased by a given amount. In this way it takes several points falling into a voxel to have voxel considered to be occupied and allows for fringe voxels caused by noise to be cleared by additional new data.
+Once the point cloud data has been transformed into the global coordinate frame the data needs to be added to the map. As previously mentioned, this is done by the octomap library, but the process is described here for clarity. The underlying data structure for this map is an octree where each leaf has a probability of occupation. This in effect is a three dimensional occupancy grid with octree storage where each leaf of the tree is a voxel in the grid. The transformed data and the origin of the sensor in the global coordinate frame are required for the insertion. The insertion method starts by iteratively ray tracing from the origin of the sensor to each data point in the point cloud.  For each voxel that the ray trace passes through the probability of occupation of for that voxel is decreased by a given amount. For the voxel that the ray trace ends in the probability of that voxel being occupied is increased by a given amount. In this way it takes several points falling into a voxel to have voxel considered to be occupied and allows for fringe voxels caused by noise to be cleared by additional new data.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=3.5in,keepaspectratio]{raytrace.pdf}
+  \includegraphics[width=5in,keepaspectratio]{raytrace.pdf}
   \caption{Two Dimensional Example of Voxel Raytracing.}
   \label{fig:voxel_raytrace}
 \end{figure}
@@ -208,32 +212,44 @@ Once the point cloud data has been transformed into the global map coordinate fr
 Figure \ref{fig:voxel_raytrace} shows this process in a two dimensional example where the gray voxels are the robot, the red dot is the sensor origin, the black dot is the point from the point cloud, the green voxels are having their occupancy decreased, and the red voxel is having its occupancy increased. This method of voxel ray tracing is originally proposed by Amanatides, J. and Woo, A., and is referenced in the octomap paper.\cite{amanatides1987fast}
 
 \section{Sources of Error During Three Dimensional Mapping}
-Mapping quality can be adversely affected by several different sources of error, including the uncertainty in the pose estimate of the robotic vehicle, random and systematic error in the Kinect data, and systematic errors due to timing and geometric misalignment.  Figure \ref{fig:slamvsoctree} shows the resulting octree map with the map from the Simultaneous Localization and Mapping (SLAM) algorithm, which is good enough in this instance to be considered truth. The octree map generally lines up with the SLAM map but has a lot of areas where the result is less than desirable.
+With this approach to three dimensional mapping, map quality can be adversely affected by several different sources of error, including the uncertainty in the pose estimate of the robotic vehicle, random and systematic error in the three dimensional data, and systematic errors due to timing and geometric misalignment.  Figure \ref{fig:slamvsoctree} shows the resulting octree map with the map from the Simultaneous Localization and Mapping (SLAM) algorithm, which is good enough in this instance to be considered truth. The octree map generally lines up with the SLAM map but has a lot of areas where the result is less than desirable.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=3.5in,keepaspectratio]{slamvsoctree.pdf}
+  \includegraphics[width=4in,keepaspectratio]{slamvsoctree.pdf}
   \caption{A top down, orthographic view of a three dimensional map generated from Kinect data with a map created by the SLAM library}
   \label{fig:slamvsoctree}
 \end{figure}
 
 \subsection{Vehicle Pose Uncertainty}
-A major component of the error introduced in mapping with this system is the vehicle pose uncertainty.  In the proposed system, but generally in any system, you have an estimate of your position and orientation, which is generally a combination of multiple sensors or observations and therefore you will often have a grow-bound cycle in the pose estimate uncertainty.  In the proposed system this occurs when a SLAM update occurs.  The SLAM algorithm provides updates to the pose of the vehicle at about 1 Hz, so between these updates the integrated wheel odometry is used to provide poses.  The integrated wheel odometry quickly diverges from the true path of the vehicle and the uncertainty grows quickly, especially when turning in place where non-linear slip is ignored in the integration.  Therefore the uncertainty grows and then is sharply snapped back on a SLAM update.  This effect can be seen in Figure~\ref{fig:uncertainty}, where the mis alignment of the laser data and the map becomes obvious, and then after a SLAM update the pose estimate is much better.
+A major component of the error introduced in mapping with this system is the vehicle pose uncertainty.  In the proposed system, but generally in any system, you have an estimate of your position and orientation, which is generally a combination of multiple sensors or observations and therefore you will often have a grow-bound cycle in the pose estimate uncertainty.  In the proposed system this occurs when a SLAM update occurs.  The SLAM algorithm provides updates to the pose of the vehicle at about 1 Hz, so between these updates the integrated wheel odometry is used to provide poses.  The integrated wheel odometry quickly diverges from the true path of the vehicle and the uncertainty grows quickly, especially when turning in place where the non-linear effects of slip are ignored in the integration of the encoders.  Therefore the uncertainty grows and then is sharply snapped back on a SLAM update.  This effect can be seen in Figure~\ref{fig:uncertainty}, where the mis alignment of the laser data and the map becomes obvious, and then after a SLAM update the pose estimate is much better.  This behavior presents a problem in the mapping, by inserting a point cloud just before the SLAM update the point cloud transform into the map frame is going to be at its worst.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=3.5in,keepaspectratio]{uncertainty.png}
+  \includegraphics[width=6in,keepaspectratio]{uncertainty.png}
   \caption{This figure shows how the integrated wheel odometry diverges from the pose provided by SLAM when turning.}
   \label{fig:uncertainty}
 \end{figure}
 
-This behavior presents a problem in the mapping, by inserting a point cloud just before the SLAM update the point cloud transform into the map frame is going to be at its worst.  Another issue is that the insertion time into the octree map does not allow for the use of all thirty point clouds per second provided by the Kinect.  A practical solution to this problem is to opportunistically select point clouds to insert.  In this system only point clouds that closely proceed SLAM updates are inserted.  It goes without saying that timing is critical here, it is important to match SLAM transform timestamps to point cloud timestamps as closely as possible to avoid further misalignment in the map.
-% Figure~\ref{fig:opp_point_clouds} shows the difference in selecting specific point clouds vs inserting the newest point cloud when ever possible.
+Another problem that comes up in the mapping process is that inserting point clouds into the octree map is expensive computationally.  The computation required is affected by the density of the point cloud data and the resolution of the map.  Some sensors, like the Kinect and Xtion Pro Live, produce this point cloud data at high rates, which are as high as thirty hertz.  Due to the computational limitations and the high rate of speed of the data, many of the point clouds have to be dropped.  This is not necessarily a problem for mapping in the system presented here, because the at the speed of the robotic vehicle, 1-2 meters per second, much of the point cloud data is redundant.
+
+A practical solution to both of these problems is to opportunistically select point clouds to insert.  In this system only point clouds that closely proceed SLAM updates are inserted.  It goes without saying that timing is critical here, it is important to match SLAM transform timestamps to point cloud timestamps as closely as possible to avoid further misalignment in the map.
+
+Another solution to this problem is to simply produce a better navigation solution.  Though not pursued in this work, combining the odometry with and IMU or simply a yaw rate gyro with a Kalman Filter would likely reduce the error from the grow-bound cycle in the mapping process.  Point clouds would still need to be throttled, but which were used in the mapping could become arbitrary.
 
 \subsection{Sensor Random Error}
-Another, less prominent source of error is the random error in the Kinect's depth data.  Khoshelham, K. showed that the random error in the depth of the Kinect data could be modeled from the theoretical principal of the depth sensor.\cite{khoshelham2011accuracy}  In paper by Khoshelham, K., they show theoretically and experimentally that the depth resolution at 4 meters is about 5 centimeters.  In addition to the reduced depth precision at greater distances, the distance directly affects the density of the point cloud.
+Another, less prominent source of error is the random error in RGBD cameras like the Kinect and the Xtion Pro Live.  There are three sources of error in the this data, loss of precision on depth measurements at greater distances, discretization error on depth measurements, and decreased density of data at greater distances.  The most prominent of these error sources is the variance in the depth measurement.  Khoshelham, K. showed that the random error in the depth of the Kinect data could be modeled from the theoretical principal of the depth sensor\cite{khoshelham2011accuracy}.  In the paper by Khoshelham, K., they show theoretically and experimentally that the depth variance at 4 meters is about 5 centimeters.  This variance changes over distance, with smaller distances yielding more precise measurements than at greater distances.
 
-In order to help minimize these errors, a practical solution might be to ignore data that is further than 3 or 4 meters.  Instead this system make a small modification to the method of insertion used by octomap.  Instead of having a constant hit and miss value for ray tracing each point in each point cloud, the hit and miss values change based on the distance to the origin of the sensor.  In this way data that is further from the sensor, especially greater than 3 or 4 meters, is less likely to make a grid occupied, and less likely to clear an occupied grid.  This allows the system to incorporate data past 4 meters, but also takes into account the decreased accuracy.
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=6in,keepaspectratio]{variable_hit_miss.pdf}
+  \caption{This figure demonstrates the variable hit and miss values used during ray tracing.}
+  \label{fig:variable_hit_miss}
+\end{figure}
+
+In order to help minimize this error, a practical solution might be to ignore data that is further than 3 or 4 meters as the variance grows quite large.  Instead this system make a small modification to the method of insertion used by octomap.  Instead of having a constant hit and miss value for ray tracing each point in each point cloud, the hit and miss values change based on the distance to the origin of the sensor.  In this way data that is further from the sensor, especially greater than 3 or 4 meters, is less likely to make a voxel occupied, and less likely to clear an occupied voxel.  This allows the system to incorporate data past 4 meters, but also takes into account the decreased precision.
+
+Figure \ref{fig:variable_hit_miss} shows the effect of long and short ray casts with the above proposed changes.  In the figure the values are varied linearly by distance from the sensor origin, but in practice the system uses a quadratic scaling of the hit and miss values.  Additionally, the scaling does not start until 3 meters from the sensor.  These two changes from the simple linear scaling method reflect the fact that the data under 4 meters is quite good, and the data degrades non-linearly at greater distances.  The results of this tactic on mapping are noticeable in specific situations, but overall improvements are marginal compared to the mapping error induced by errors in the navigation solution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Teleoperation
@@ -360,7 +376,7 @@ This chapter outlines the experiment goals, setup, and results.
 \section{Experiment Goals}
 Talk about what we hope to achieve by including a real system.
 
-\section{Experimental Setup}
+\section{Experimental Setup}\label{sec:experimental_setup}
 Talk about the myriad systems used to talk data and their capabilities, etc...
 
 \section{Experimental Results}
@@ -412,10 +428,7 @@ using std::cout;
 using std::endl;
 
 int main(void) {
-  cout << "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-       << "Quisque bibendum tincidunt dolor eget tincidunt. Morbi "
-       << "sagittis cursus vestibulum. Vestibulum vulputate varius "
-       << "tempor." << endl;
+  cout << "Hello World." << endl;
   return 0;
 }
 \end{verbatim}
