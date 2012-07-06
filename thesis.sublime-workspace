@@ -381,8 +381,8 @@
 	"file_history":
 	[
 		"/Users/william/devel/thesis/thesis.tex",
-		"/Users/william/Downloads/ion_plans_paper/ion_plans.tex",
 		"/Users/william/devel/thesis/references.bib",
+		"/Users/william/Downloads/ion_plans_paper/ion_plans.tex",
 		"/Users/william/devel/thesis/thesis.bbl",
 		"/Users/william/devel/thesis/thesis.bbl [6]",
 		"/Users/william/Downloads/ion_plans_paper/citations.bib",
@@ -530,6 +530,8 @@
 		"find_history":
 		[
 			"[here",
+			"6.5",
+			"[here",
 			"here",
 			"[h]",
 			"kinect",
@@ -666,6 +668,6 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 101.0,
+	"side_bar_width": 130.0,
 	"status_bar_visible": true
 }
