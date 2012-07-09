@@ -90,8 +90,7 @@ This thesis uses novel three dimensional sensors like the Microsoft Kinect\cite{
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{acknowledgments}
-Acknowledge people here.
-% TODO: this
+Thanks to the entire GAVLab for helping me with the review of the thesis, collecting data, and moral support.  And thanks to my family, whom I haven't seen much of recently.
 \end{acknowledgments}
 
 \tableofcontents
@@ -121,9 +120,7 @@ Outdoor and indoor environments can be difficult to capture in full three dimens
 
 %% TODO: Add a section about teleoperation here to balance the mapping section.
 
-%% TODO: Add a list of contributions
-
-The rest of this thesis will cover the system design process and resulting artifacts in Chapter \ref{chap:system_design}, the three dimensional mapping subsystem in Chapter \ref{chap:3d_mapping}, the teleoperation subsystem in Chapter \ref{chap:teleoperation}, discuss the techniques for latency reduction in Chapter \ref{chap:latency_reduction}, describe the experimental setup and results in Chapter \ref{chap:experiments}, and finally draw conclusions and look toward future work in Chapter \ref{chap:conclusion}.
+This thesis work shows that three dimensional mapping can be preformed using novel three dimensional sensors, like the Microsoft Kinect, indoors in real-time.  It also shows that these three dimensional maps can aid teleoperation of robotic vehicles by providing useful additional information to the teleoperator.  Finally, it shows that using a vehicle model to predict the position of the vehicle in the presence of latency can reduce the negative effects on teleoperation.  The rest of this thesis will cover the system design process and resulting artifacts in Chapter \ref{chap:system_design}, the three dimensional mapping subsystem in Chapter \ref{chap:3d_mapping}, the teleoperation subsystem in Chapter \ref{chap:teleoperation}, discuss the techniques for latency reduction in Chapter \ref{chap:latency_reduction}, describe the experimental setup and results in Chapter \ref{chap:experiments}, and finally draw conclusions and look toward future work in Chapter \ref{chap:conclusion}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: System Design
@@ -577,26 +574,56 @@ It should be noted that the teleoperator, in the case of three dimensional map a
   \label{fig:3d_map_doorway}
 \end{figure}
 
-Figure \ref{fig:3d_map_doorway} shows a more typical view for the teleoperator on the left and a camera picture of the vehicle passing through the same obstacle on the right.  The setup on the left is the three dimensional map only, no predictive vehicle model, but is properly lacking the two dimensional SLAM map as described.
+Figure \ref{fig:3d_map_doorway} shows a more typical view for the teleoperator on the left and a camera picture of the vehicle passing through the same doorway on the right.  The setup on the left is the three dimensional map only, no predictive vehicle model, but is properly lacking the two dimensional SLAM map as described above.
+
+The complete results of the latency reduction trials are listed in Appendix 1, but Figure \ref{fig:trial_times} shows the average times for each of the trial scenarios.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=6.5in,keepaspectratio]{trial_times.pdf}
+  \caption{Average time to complete the trial course in seconds by scenario and latency}
+  \label{fig:trial_times}
+\end{figure}
+
+Figure \ref{fig:trial_hits} shows the average number of hits, actual and near hits that were prevented, plotted against each teleoperation scenario and for each latency setting.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=6.5in,keepaspectratio]{trial_hits.pdf}
+  \caption{Average number of hits during a trial run by scenario and latency}
+  \label{fig:trial_hits}
+\end{figure}
+
+The above figures are averages of the results from the trials, but the individual teleoperators varied considerably, as some teleoperators were cautious and others were aggressive, causing different ratios of times to hits for each teleoperator.  In addition to differences in style, the teleoperators differed considerably in overall skill.  Some teleoperators outperformed their peers in both time and number of hits.  Consistency in the teleoperators was also a problem, where some results departed from what was common place due to getting stuck at a particular part or by getting lucky with avoiding an obstacle.  All of these problems and the problem of teleoperators improving through learning can be diminished with larger sample sizes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Conclusions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Conclusion}\label{chap:conclusion}
-This chapter draws some conclusions and looks to future work.
+This thesis has shown that three dimensional maps of the environment can be constructed using novel three dimensional sensors like the Microsoft Kinect and ASUS Xtion Pro Live, and that applying those maps to aid in teleoperation can make improvements in teleoperation speed and accuracy.  Furthermore, this thesis work has shown that latency can cause teleoperation activities to slow down and become more error prone, and that using a vehicle model can help reduce the effects of latency.  The predictive vehicle model is especially useful in high latency systems, but would also be useful in faster moving systems with moderate latency.
+
+From discussions with the teleoperators from the latency reduction trials and from the data results of the latency reduction trials some conclusions can be drawn, and other speculations made.  From the results and watching the teleoperators it is obvious that latency, especially high amounts of latency are extremely detrimental to teleoperation.  There is a relationship between the amount of tolerable latency and the speed of the vehicle.  Since the robotic test vehicle was relatively slow, about one meter per second, a larger amount of latency was tolerable.  Latencies of 500 milliseconds RTT were scarcely different from no latency on the ATRV, but if the vehicle traveled faster, say 5 meters per second, then 500 milliseconds of latency RTT might not be acceptable.
+
+The consensus amongst the latency reduction trial teleoperators was that the thee dimensional map of the environment was most useful when navigating tight obstacles like the doorway.  With only a camera it was difficult to navigate near obstacles which had fallen out of the field of view of the camera.  For instance the doorway was difficult unless you lined up perfectly before driving through with only the camera.  With the three dimensional map the teleoperator has some notion of where the vehicle is in relation to obstacles on the sides or the behind of the vehicle.  This helps to adjust the course of the vehicle when near obstacles that are not in front of the vehicle.
+
+A trend in the data suggests, however, that the teleoperators were faster using just the camera.  The theory here is that without additional spatial information the teleoperator has to just go through or past obstacles somewhat blindly.  When the three dimensional data is available the teleoperators are more careful when navigating obstacles, constantly adjusting the three dimensional camera to check if the vehicle is clearing the obstacles.  Though the data suggests that less obstacles are hit when using the three dimensional map and predictive vehicle model, the teleoperators do not produce perfect, hit free runs even with the assistance.  Sometimes when errors in the mapping system would occur and produce incorrect maps, the teleoperators would make errors, so some of the hits during three dimensional assisted trials might be due to problems with the mapping system.
+
+Some of the teleoperators did not find the predictive vehicle model to be consciously useful, but there seemed to be less over shooting when turning in place and the teleoperators moved forward with more confidence when they had the predictive vehicle model.  There seemed to be a subconscious improvement from the predictive vehicle model, allowing for more confident movement and longer spurts of movement as well.  Some teleoperators, however, found the predictive vehicle model very useful and preformed much better with it than without it.  Especially when turning in place and when making fast short linear movements.  Another important aspect of the predictive vehicle model is that it gives instant visual feedback to the teleoperator's input to the gamepad.  Without the immediate visual feedback, the teleoperators actions become mentally decoupled with the perceived robot movement, which is pointed out in the the work from Huber, et. al. at Carnegie Mellon University\cite{photo_real}.
+
+The predictive vehicle model did not perfectly match the motion of the robotic vehicle in all cases.  The linear displacement of the model matched that of the vehicle fairly well, but the in place turning estimate was less accurate.  This due, in part, to the fact that the ATRV does not perfectly execute the commanded angular velocity.  For example, when the vehicle is commanded zero linear velocity and 0.2 angular velocity, the ATRV might turn in place at 0.1 angular velocity.  This causes a discrepancy in the predicted and actual change in heading.  The heading error and other errors could be alleviated in two different fashions.  The robotic vehicle could be made to follow commanded velocities better by integrating a yaw rate observation into the closed loop controller.  Alternatively, the vehicle model could be augmented with elements that properly describe the disparity of the commanded and actual velocities.
 
 \section{Future Work}
-Some thing about future work.
+This thesis work shows the viability of a system that produces a three dimensional map and that the map and other latency reducing techniques can be successfully applied to the teleoperation activities.  However, the mapping process is far from perfect, the evidence of the improvement to teleoperation is incomplete, and the scope of the experiments narrow.  Future work could cover much of what is missing in this work.
 
 \subsection{Improved Mapping}
-Talk about KinectFusion again.
+Three dimensional mapping is a hot field of study at the moment and many alternative methods for producing three dimensional maps in real time are still being developed as of the writing of this thesis.  Some examples of this have been mentioned already in this thesis, like the KinectFusion work that has been going on in the past year\cite{izadi2011kinectfusion}.  Such technologies could make three dimensional maps with much high fidelity and accuracy, increasing their impact on the teleoperator's ability to control vehicles in tight obstacle configurations.  Another aspect of the mapping system that could be improved is the robotic vehicle's navigation solution, which directly affects the resulting map quality.  A different navigation system or a more tightly integrated system might offer better results.
 
 \subsection{Dynamic Vehicle Models}
-Talk about how a dynamic vehicle model might improve the latency reduction system.
+The above section touched on the fact that the vehicle model does not perfectly match the actions of the robotic vehicle.  This is true even of the low dynamic ATRV, but on more dynamic systems where things like non-linear dynamics, suspensions, and terrain affect the predictions, a more sophisticated vehicle model will be required.  Developing and integrating a more sophisticated vehicle model to be tested on a more dynamic robotic vehicle is another avenue of future work.
 
 \subsection{More Latency Reduction Studies}
-More data is required to properly quantify the latency reduction system's effectiveness.  (Likely)
+The results of the latency reduction techniques are interesting, but incomplete.  There are still many aspects of the experiments which could be biasing the outcomes, like: teleoperator learning, always having a camera (i.e. there were no trials where the camera was unavailable), and the short duration of the trials.  More extensive and comprehensive trials could produce more information about the nature of the improvements gained from the three dimensional data and predictive vehicle model.
 
 %=================
 %=================
