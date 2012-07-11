@@ -21,6 +21,11 @@
 %% For Algorithms
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{color,hyperref}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
 
 %% For graphics
 \usepackage[pdftex]{graphicx}
@@ -197,19 +202,19 @@ Each time new data from the three dimensional sensor is received by the computer
   \label{fig:transforms}
 \end{figure}
 
-In order to transform the point clouds into the global coordinate frame, each point in the point cloud must be transformed into the global coordinate frame.  Each point is represented by the homogeneous vector in Equation \ref{eq:point}.
+In order to transform the point clouds into the global coordinate frame, each point in the point cloud must be transformed into the global coordinate frame.  Each point is represented by the homogeneous vector in Equation (\ref{eq:point}).
 
 \begin{equation} \label{eq:point}
 \left[ \begin{array}{c} x \\ y \\ z \\ 1 \end{array} \right]
 \end{equation}
 
-The points are transformed using the homogeneous transform matrix\cite{lavalle2006planning}, defined in Equation \ref{eq:transform_matrix}.
+The points are transformed using the homogeneous transform matrix\cite{lavalle2006planning}, defined in Equation (\ref{eq:transform_matrix}).
 
 \begin{equation} \label{eq:transform_matrix}
-\left[ \begin{array}{cccc} \cos \alpha \cdot \cos \beta  & \cos \alpha \cdot \sin \beta \cdot \sin \gamma \; -\; \sin \alpha \cdot \cos \gamma  & \cos \alpha \cdot \sin \beta \cdot \cos \gamma \; +\; \sin \alpha \cdot \sin \gamma  & x_{t} \\ \sin \alpha \cdot \cos \beta  & \sin \alpha \cdot \sin \beta \cdot \sin \gamma \; +\; \cos \alpha \cdot \cos \gamma  & \sin \alpha \cdot \sin \beta \cdot \cos \gamma \; -\; \cos \alpha \cdot \sin \gamma  & y_{t} \\ -\sin \beta  & \cos \beta \cdot \sin \gamma  & \cos \beta \cdot \cos \gamma & z_{t} \\ 0 & 0 & 0 & 1 \end{array} \right]
+\left[ \begin{array}{cccc} \cos \psi \cdot \cos \beta  & \cos \psi \cdot \sin \beta \cdot \sin \gamma \; -\; \sin \psi \cdot \cos \gamma  & \cos \psi \cdot \sin \beta \cdot \cos \gamma \; +\; \sin \psi \cdot \sin \gamma  & x_{t} \\ \sin \psi \cdot \cos \beta  & \sin \psi \cdot \sin \beta \cdot \sin \gamma \; +\; \cos \psi \cdot \cos \gamma  & \sin \psi \cdot \sin \beta \cdot \cos \gamma \; -\; \cos \psi \cdot \sin \gamma  & y_{t} \\ -\sin \beta  & \cos \beta \cdot \sin \gamma  & \cos \beta \cdot \cos \gamma & z_{t} \\ 0 & 0 & 0 & 1 \end{array} \right]
 \end{equation}
 
-In the homogeneous transform matrix $\gamma$ is Roll about the $x$-axis, $\beta$ is pitch about the $y$-axis, and $\alpha$ is Yaw about the $z$-axis.  $x_{t}$, $y_{t}$, and $z_{t}$ are the translational components of the transform matrix.
+In the homogeneous transform matrix $\gamma$ is Roll about the $x$-axis, $\beta$ is pitch about the $y$-axis, and $\psi$ is Yaw about the $z$-axis.  $x_{t}$, $y_{t}$, and $z_{t}$ are the translational components of the transform matrix.
 
 By multiplying each of the points in the point cloud by this transform matrix, the entire point cloud is transformed into the global coordinate frame and is ready to be inserted into the map.
 
@@ -283,7 +288,7 @@ The point clouds are initially inserted into an occupancy probability octree whe
 Once the map is in the maximum likelihood tree format, the map needs to be transmitted to the client. In some cases, however, there is more data to send than there is bandwidth available. In these cases a lower resolution version of the map differences can be sent and more detailed differences can be sent in the future when more bandwidth is available.
 
 \subsection{Octree Set Difference}
-The first step in synchronizing the server and client octrees is to detect what has changed since the last update. In order to determine this the client octree is set differenced with the server octree which yields the changes in the server from a previous point in time. In order to find the set difference between the two octrees Algorithm \ref{alg:octree_diff} is used. This algorithm is a simple element-wise difference and can be considered a volumetric difference.
+The first step in synchronizing the server and client octrees is to detect what has changed since the last update. In order to determine this, the client octree is set differenced with the server octree which yields the changes in the server from a previous point in time. In order to find the set difference between the two octrees Algorithm \ref{alg:octree_diff} is used. This algorithm is a simple element-wise difference and can be considered a volumetric difference.
 
 \begin{algorithm}
 \caption{Algorithm for Pairwise Difference of Octrees}
@@ -302,7 +307,7 @@ The first step in synchronizing the server and client octrees is to detect what 
 \end{algorithm}
 
 \subsection{Bandwidth Adjustment Algorithm}
-Once the differences have been determined, the differences need to be sent over the network to the client computer to be united with the current client map. If not enough bandwidth is available, the differences can be reduced by differencing the two octrees at a lower resolution. The lower resolution versions of the trees can be obtained by limiting the depth of the query into the octree. If the leaf size of the octree is 2 centimeters, then reducing the query depth by one will result in a subtree with leaves, 4 centimeters in size.  This phenomenon is demonstrated in a map of the Shelby Center at Auburn University by Figure \ref{fig:treedepth}.  The visualization in Figure \ref{fig:treedepth} was done using octovis\cite{octomap}, which is part of octomap.
+Once the differences have been determined, the differences need to be sent over the network to the client computer to be united with the current client map. If not enough bandwidth is available, the differences can be reduced by differencing the two octrees at a lower resolution. The lower resolution versions of the trees can be obtained by limiting the depth of the query into the octree.  For example, if the leaf size of the octree is 2 centimeters, then reducing the query depth by one will result in a subtree with leaves, 4 centimeters in size.  This phenomenon is demonstrated in a map of the Shelby Center at Auburn University by Figure \ref{fig:treedepth}.  The visualization in Figure \ref{fig:treedepth} was done using octovis\cite{octomap}, which is part of octomap.
 
 \begin{figure}[ht]
   \centering
@@ -339,10 +344,10 @@ The algorithm for selecting the depth is proposed in Algorithm \ref{alg:bandwidt
 \end{algorithmic}
 \end{algorithm}
 
-The depth function simply returns a subtree of the given tree at the given height, and the height function gives the height of the specified tree.  The resolution function simply returns the dimension of a leaf at the given level.  The current available bandwidth function could be implemented in several ways, but the topic of available bandwidth estimation has been covered in the literature\cite{prasad2003bandwidth}. The principle behind the bandwidth estimation includes metrics like round-trip-time, average delay, packet loss, and throughput to determine the bandwidth currently available.  During testing the bandwidth will be artificially controlled to exercise this component of the system.  Artificially controlling the bandwidth used by the mapping system will also allow for quality of service to be enforced.  Quality of service would allow the system to prioritize things like teleoperation commands, video, or other telemetry over the map update.
+The depth function simply returns a subtree of the given tree at the given height, and the height function gives the height of the specified tree.  The resolution function simply returns the dimension of a leaf at the given level.  The current available bandwidth function could be implemented in several ways, which has been covered in the literature\cite{prasad2003bandwidth}. The principle behind the bandwidth estimation includes metrics like round-trip-time, average delay, packet loss, and throughput to determine the bandwidth currently available.  In this thesis testing, as discussed in Chapter \ref{chap:experiments}, the bandwidth was artificially controlled to exercise this component of the system.  Artificially controlling the bandwidth used by the mapping system will also allow for quality of service to be enforced.  Quality of service would allow the system to prioritize things like teleoperation commands, video, or other telemetry over the map update.
 
 \subsection{Octree Set Union}
-The final stage of synchronizing the server and client octrees is to unite the differences with the client octree. This algorithm is just a simple union operation and can be performed by simply inserting every voxel of the differences into the client map using the normal octree insertion method.\cite{meagher1982geometric}
+The final stage of synchronizing the server and client octrees is to unite the differences with the client octree. This algorithm is just a simple union operation and can be performed by simply inserting every voxel of the differences into the client map using the normal octree insertion method as in \cite{meagher1982geometric}.
 
 \section{Visualization}
 The purpose of mapping the environment and streaming that map to the client is so that the teleoperator might gain some improvement of control when teleoperating the robotic vehicle.  In addition to the map being sent to the client, the position of the robotic vehicle in the map coordinate frame must be sent to the client as well.  With these two pieces of information the visualization of the vehicle in the three dimensional environment is possible.
@@ -379,15 +384,15 @@ For efficiency in drawing, one of the custom drawing types is a `cube list', in 
 \end{algorithmic}
 \end{algorithm}
 
-The algorithm for drawing an octree in rviz is displayed in Algorithm \ref{alg:octree_rviz}.  In the algorithm the $leaves$ function returns an array of the leaves in the given octree, the $size$ function returns the dimensions of the voxel represented by a given leaf, and the $sendCubeList$ function sends the given set of leaves to rviz to be rendered at the given size.  This algorithm sorts the leaves of the octree into sets by height.  Then each set of leaves can be sent as one `cube list' of the appropriate size for that height to be rendered in rviz.
+The algorithm for drawing an octree in rviz is displayed above in Algorithm \ref{alg:octree_rviz}.  In the algorithm the $leaves$ function returns an array of the leaves in the given octree, the $size$ function returns the dimensions of the voxel represented by a given leaf, and the $sendCubeList$ function sends the given set of leaves to rviz to be rendered at the given size.  This algorithm sorts the leaves of the octree into sets by height.  Then each set of leaves can be sent as one `cube list' of the appropriate size for that height to be rendered in rviz.
 
 \subsection{Coloring the Octree}
-When rendering the octree, a few options are available on how to color them.  One obvious option is to make all the leaves the same flat color.  a single color makes it difficult to see the three dimensional structure, so this color method is not used.  Another option is to color the voxels of the octree by height in the global coordinate frame.  The height map coloring gives some context to the voxels, where the lowest to the ground voxels will be one color and voxels near the ceiling will be a different color.  The height map coloring is the most effective method of rendering the voxels such that the teleoperator can understand the three dimensional structure.
+When rendering the octree, a few options are available on how to color them.  One obvious option is to make all the leaves the same flat color.  However, a single color makes it difficult to see the three dimensional structure, so this color method is not used.  Another option is to color the voxels of the octree by height in the global coordinate frame.  The height map coloring gives some context to the voxels, where the lowest to the ground voxels will be one color and voxels near the ceiling will be a different color.  The height map coloring is the most effective method of rendering the voxels such that the teleoperator can understand the three dimensional structure.
 
-Another option is to color the voxels by the color they would have in the real environment.  Per point coloring requires that the system, like the Kinect or Xtion Pro Live, provides color per point in the incoming point clouds.  This information is stored in the octree as an average of the colors of points that raytraced to each leaf.  This representation can add a more photo realistic quality to the environment for the teleoperator but consumes additional bandwidth and does not render well when the map is at a low resolution.
+Another option is to color the voxels by the color they would have in the real environment.  Per point coloring requires that the system, like the Kinect or Xtion Pro Live, provides color per point in the incoming point clouds.  This information is stored in the octree as an average of the colors of points that raytraced to each leaf.  This representation can add a more photo realistic quality to the environment for the teleoperator but consumes additional bandwidth and does not render well when the map is at a low resolution, therefore the height color map was chosen as the standard for the experiments.
 
 \section{Teleoperator Input}
-The final responsibility of the teleoperation subsystem is to collect the input from the teleoperator and transmit the input to the robotic vehicle.  Capturing the input is achieved using a Human Interface Device (HID) like a gamepad or a joystick.  In addition to a gamepad or joystick, a more vehicle like system could be used like a steering wheel and pedals.  The input from one of these devices is mapped to linear and angular velocities that are appropriate for the vehicle being teleoperated.  These linear and angular velocities are sent to the robotic vehicle when they are executed by that subsystem.
+The final responsibility of the teleoperation subsystem is to collect the input from the teleoperator and transmit the input to the robotic vehicle.  Capturing the input is achieved using a Human Interface Device (HID) like a gamepad or a joystick.  In addition to a gamepad or joystick, a more vehicle like system could be used like a steering wheel and pedals.  The input from one of these devices is mapped to linear and angular velocities that are appropriate for the vehicle being teleoperated.  These linear and angular velocities are then sent to the robotic vehicle when they are executed by that subsystem.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Latency Reduction
@@ -399,10 +404,10 @@ One of the largest factors in a teleoperator's ability to control a vehicle effe
 \section{Latency}
 The transmission latency experienced in a teleoperation system can be described as two parts, the send latency and the receive latency.  The send latency is the time it takes for information generated on the teleoperator computer to be sent to the robotic vehicles computer.  The receive latency is the time for the reverse to occur, i.e. for data generated on the robotic vehicles computer to be sent to the teleoperator computer.  In most networks the latency to and from a remote network node are about the same, meaning that round trip time (RTT) is split even between sending and receiving.  The RTT being split evenly is true on average, but the latency, especially over reliable wireless networks, varies randomly with environmental conditions.  Even over short periods the RTT can vary quite a bit, but in systems that have sufficient bandwidth and good signal strength this variance is minimal.  It is also important to note that when referring to RTT latency the time spent processing on the remote machine is not included, which is why it is often broken into sending and receiving latencies.
 
-In addition to the transmission latency there exists processing latency on both sides of the teleoperation system.  On the robotic vehicle system there is a latency between when something physically occurs and when the data indicating the change is sent to the teleoperator.  In the case of a camera there is a delay between when the image is captured and when it is sent caused by processing the image and preparing or packaging it for transmission.  This is more pronounced when the data being transmitted is aggregated data.  For instance, when new three dimensional data is received there is latency incurred while inserting the new data into the map before the map is then packaged and transmitted to the teleoperator computer.  On the teleoperator computer there is overhead due to transmitting data to the robotic vehicle computer, but the commands sent are usually small and this latency is insignificant.  If the teleoperator computer, however, needed to transmit a map to the robotic vehicle computer for some reason, then this effect would be greater.
+In addition to the transmission latency there exists processing latency on both sides of the teleoperation system.  On the robotic vehicle system there is a latency between when something physically occurs and when the data indicating the change is sent to the teleoperator.  In the case of a camera there is a delay between when the image is captured and when it is sent caused by processing the image and preparing or packaging it for transmission.  This is more pronounced when the data being transmitted is aggregated data.  For instance, when new three dimensional data is received, there is latency incurred while inserting the new data into the map before the map is then packaged and transmitted to the teleoperator computer.  On the teleoperator computer there is overhead due to transmitting data to the robotic vehicle computer, but the commands sent are usually small and this latency is insignificant.  If the teleoperator computer, however, needed to transmit a map to the robotic vehicle computer for some reason, then this effect would be greater.
 
 \section{Reducing Latency}
-One method for reducing the effects of latency while teleoperating the robotic vehicle is to provide the teleoperator an estimate of the robot vehicles pose based on the teleoperators input.  In order to create this estimate the teleoperator computer uses the latest available robot vehicle position in conjunction with the user input since that latest position to simulate the motion of the robotic vehicle on the teleoperator computer interface.  Motion is simulated over a period of time bounded by the time stamp of the latest robot vehicle pose and the current time.  The simulation is run continuously at a constant rate incorporating new user input as time moves forward, but the entire simulation must be rerun when new telemetry from the robot is received.  This adds a constraint on the simulation look ahead time, in that the simulation cannot accurately predict further into the future than the send latency.  Figure \ref{fig:latency_reduction_timing} shows process of the estimation with a vehicle starting at stand still and driving forward for a brief time.
+One method for reducing the effects of latency while teleoperating the robotic vehicle is to provide the teleoperator an estimate of the robot vehicles pose based on the teleoperators input.  In order to create this estimate, the teleoperator computer uses the latest available robot vehicle position in conjunction with the user input since that latest position to simulate the motion of the robotic vehicle on the teleoperator computer interface.  Motion is simulated over a period of time bounded by the time stamp of the latest robot vehicle pose and the current time.  The simulation is run continuously at a constant rate incorporating new user input as time moves forward, but the entire simulation must be rerun when new telemetry from the robot is received.  This adds a constraint on the simulation look ahead time, in that the simulation cannot accurately predict the vehicle position into the future because there is no user input for the future.
 
 \begin{figure}[ht]
   \centering
@@ -411,37 +416,37 @@ One method for reducing the effects of latency while teleoperating the robotic v
   \label{fig:latency_reduction_timing}
 \end{figure}
 
-In Figure \ref{fig:latency_reduction_timing} the RTT is two seconds which means that there is one second before commands reach the robotic vehicle, and an additional second before telemetry of the movement is received by the teleoperator computer.  The figure shows that the estimate moves immediately with input from the teleoperator, but since it takes one second for the robotic vehicle to receive the command, the truth data does not move one meter until two seconds into the scenario.  Finally, three seconds into the scenario the teleoperator will observe the robotic vehicle telemetry move one meter.  As the teleoperator decreases the commanded velocity the estimate, truth, and telemetry converge.  At a given speed the simulated vehicle position will never extend further than the speed times the RTT.
+Figure \ref{fig:latency_reduction_timing} shows process of the estimation with a vehicle starting at stand still and driving forward for a brief time.  In the figure the RTT is two seconds which means that there is one second before commands reach the robotic vehicle, and an additional second before telemetry of the movement is received by the teleoperator computer.  The figure shows that the estimate moves immediately with input from the teleoperator, but since it takes one second for the robotic vehicle to receive the command, the truth data does not move one meter until two seconds into the scenario.  Finally, three seconds into the scenario the teleoperator will observe the telemetry of the robotic vehicle move one meter.  As the teleoperator decreases the commanded velocity the estimate, truth, and telemetry converge.  At a given speed the simulated vehicle position will never extend further than the speed times the RTT.
 
 \section{Vehicle Model}
-In order to produce the estimated vehicle position based on the teleoperator input, a two dimensional kinematic model of the vehicle is used to simulate the changes in position over time.  The kinematic model of the differential, non-holonomic system is given by Equation \ref{eq:kinematic_model}.
+In order to produce the estimated vehicle position based on the teleoperator input, a two dimensional kinematic model of the vehicle is used to simulate the changes in position over time in this thesis.  The purpose of this thesis is to show that using a model to predict the position of the vehicle is useful for improving teleoperation performance, and the vehicle used to test is well described using a simple kinematic model.  This thesis work is designed such that a more sofisticated, dynamic model can easily be substituted is desired.  The kinematic model of the differential, non-holonomic system is given by Equation (\ref{eq:kinematic_model}).
 
 \begin{equation} \label{eq:kinematic_model}
-\zeta \; =\; \left[ \begin{array}{c} \Delta x \\ \Delta y \\ \Delta \alpha \end{array} \right]\; =\; \left[ \begin{array}{c} V_{l}\; \cdot \; \Delta t \\ 0 \\ V_{\alpha }\; \cdot \; \Delta t \end{array} \right]
+\zeta \; =\; \left[ \begin{array}{c} \Delta x \\ \Delta y \\ \Delta \psi \end{array} \right]\; =\; \left[ \begin{array}{c} V_{l}\; \cdot \; \Delta t \\ 0 \\ V_{\psi }\; \cdot \; \Delta t \end{array} \right]
 \end{equation}
 
-In Equation \ref{eq:kinematic_model} $\zeta$ is a vector that represents the change in position in the robot, or vehicle, frame.  The $\zeta$ vector has components $\Delta x$ which is displacement in $x$ direction of the robot frame, $\Delta y$ which is the displacement in the $y$ direction, and $\Delta \alpha$ which is the change in heading in the robot frame.  These displacements are given by the right most vector in Equation \ref{eq:kinematic_model}.  The $V_{l}$ term is the linear velocity from the teleoperator input, the $V_{\alpha}$ is the angular velocity from the teleoperator input, and the $\Delta t$ component is the change in time between simulation steps.  The simulation is stepped by a constant $\Delta t$ so a estimated path is produced, not just a estimate for the current position or for each change in teleoperator input.
+In Equation (\ref{eq:kinematic_model}) $\zeta$ is a vector that represents the change in position in the robot, or vehicle, frame.  The $\zeta$ vector has components $\Delta x$ which is displacement in $x$ direction of the robot frame, $\Delta y$ which is the displacement in the $y$ direction, and $\Delta \psi$ which is the change in heading in the robot frame.  These displacements are given by the right most vector in Equation (\ref{eq:kinematic_model}).  The $V_{l}$ term is the linear velocity from the teleoperator input, the $V_{\psi}$ is the angular velocity from the teleoperator input, and the $\Delta t$ component is the change in time between simulation steps.  The simulation is stepped by a constant $\Delta t$ so a estimated path is produced, not just a estimate for the current position or for each change in teleoperator input.
 
-For each set of changes in the position, $\zeta$, the changes must be rotated into the odometry frame from the robot frame.  This rotation is given by the rotation matrix in Equation \ref{eq:2d_rotation}.
+For each set of changes in the position, $\zeta$, the changes must be rotated into the odometry frame from the robot frame.  This rotation is given by the rotation matrix in Equation (\ref{eq:2d_rotation}).
 
 \begin{equation} \label{eq:2d_rotation}
-R \; =\; \left[ \begin{array}{ccc} \cos \; \alpha  & -\sin \; \alpha  & 0 \\ \sin \; \alpha  & \cos \; \alpha  & 0 \\ 0 & 0 & 1 \end{array} \right]
+R \; =\; \left[ \begin{array}{ccc} \cos \; \psi  & -\sin \; \psi  & 0 \\ \sin \; \psi  & \cos \; \psi  & 0 \\ 0 & 0 & 1 \end{array} \right]
 \end{equation}
 
-In Equation \ref{eq:2d_rotation} the $\alpha$ term is the current vehicle heading.  This rotation matrix is multiplied by the $\zeta$ vector in Equation \ref{eq:kinematic_model} to rotate those changes into the odometry frame, and then these changes in the odometry frame are added to the existing robot state, completing the simulation step.  This is shown in Equation \ref{eq:update_kinematic}.
+In Equation (\ref{eq:2d_rotation}) the $\psi$ term is the current vehicle heading.  This rotation matrix is multiplied by the $\zeta$ vector in Equation (\ref{eq:kinematic_model}) to rotate those changes into the odometry frame, and then these changes in the odometry frame are added to the existing robot state, completing the simulation step.  This is shown in Equation (\ref{eq:update_kinematic}).
 
 \begin{equation} \label{eq:update_kinematic}
-\left[ \begin{array}{c} x \\ y \\ \alpha  \end{array} \right]\; =\; \left[ \begin{array}{c} x \\ y \\ \alpha  \end{array} \right]\; +\; \left( R\; \cdot \; \zeta  \right)
+\left[ \begin{array}{c} x \\ y \\ \psi  \end{array} \right]\; =\; \left[ \begin{array}{c} x \\ y \\ \psi  \end{array} \right]\; +\; \left( R\; \cdot \; \zeta  \right)
 \end{equation}
 
-The simulation is iterated as described until the simulation time matches the current time.  The result is a series of states from the time of the latest robotic vehicle telemetry to the current time.  In order to use this data to assist the teleoperator the data must be visualized in a useful manner.
+The simulation is iterated as described until the simulation time matches the current time.  The result is a series of states from the time of the latest robotic vehicle telemetry to the current time.  In order to use this data to assist the teleoperator the data must be visualized in a useful manner, which is discussed in the following section.
 
 \section{Visualizing the Estimate}
-Like the visualization of the mapping system, which is described in the Section \ref{sec:rendering_the_map}, the visualization of the model prediction is done in rviz.  Initially each of the simulation states were inserted into a `Path' message, which is a list of positions which are rendered as a line.  This gave, which originates from the telemetry origin, indicates the path the vehicle will take.  This method has a draw back, in that when the robotic vehicle is commanded to turn in place, no line is given, as the simulated states all have the same position, but different headings.
+Like the visualization of the mapping system, which is described in the Section \ref{sec:rendering_the_map}, the visualization of the model prediction is done in rviz.  Initially each of the simulation states were inserted into a `Path' message, which is a list of positions which are rendered as a line.  This gave the teleoperation an arc, which originated from the telemetry origin, and indicated the path the vehicle would take.  This method had a draw back, in that when the robotic vehicle was commanded to turn in place, no line was given, as the simulated states all have the same position, but different headings.
 
-To solve the issue of zero radius turning an array of arrows were used, instead of a line, to display the predicted path of the vehicle.  This method allowed for indication of motion when turning in place while still providing a good indication of the path when driving straight and turning.  One problem with just using the array of arrows is that when the telemetry from the robot is being displayed using a three dimensional model of the robot, the arrows tend to get covered up.
+To solve the issue of zero radius turning, an array of arrows were used, instead of a line, to display the predicted path of the vehicle.  This method allowed for indication of motion when turning in place while still providing a good indication of the path when driving straight and turning.  One problem with just using the array of arrows is that when the telemetry from the robot is being displayed using a three dimensional model of the robot, the arrows tend to get covered up.
 
-To further help the teleoperator make use of the model predictions a duplicate three dimensional model of the robot is placed at the current estimated position.  This model is colored red and gives an indication of the position of the robot as the teleoperator varies their input.  Figure \ref{fig:latency_ss} shows the red three dimensional model leading the light colored telemetry model of the robot, indicating the position of the vehicle due the input from the teleoperator.
+To further help the teleoperator make use of the model predictions a duplicate three dimensional model of the robot is placed at the current estimated position.  This model is colored red and gives an indication of the position of the robot as the teleoperator varies their input.  Figure \ref{fig:latency_ss} shows the red three dimensional model leading the light colored telemetry model of the robot, indicating the position of the vehicle due the input from the teleoperator.  The image on the right in Figure \ref{fig:latency_ss} shows the model prediction from below the vehicle, which reveals the array of arrows representing the path being taken by the model prediction.  These arrows are normally hidden to the teleoperator, but the teleoperator could rotate the camera to see them if they wish.
 
 \begin{figure}[ht]
   \centering
@@ -450,9 +455,7 @@ To further help the teleoperator make use of the model predictions a duplicate t
   \label{fig:latency_ss}
 \end{figure}
 
-The image on the right in Figure \ref{fig:latency_ss} shows the model prediction from below the vehicle, which reveals the array of arrows representing the path being taken by the model prediction.  These arrows are normally hidden to the teleoperator, but they can rotate the camera to see them if they wish.
-
-Experiments designed to test the effect of the vehicle model prediction in the presence of latency are described in Section \ref{sec:latency_reduction_trials}, titled Latency Reduction Trials.
+Experiments designed to test the effect of the vehicle model prediction in the presence of latency are described in Section \ref{sec:latency_reduction_trials}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Experiments
@@ -462,9 +465,9 @@ Experiments designed to test the effect of the vehicle model prediction in the p
 This chapter covers the latency reduction and three dimensional mapping experiments, the hardware and software systems used execute the experiments, and the results of the experiments.  The goals of the experiments are outlined, showing their purpose and relevance.  In order to carry out the described experiments a experimental test fixture was constructed, consisting of various hardware and software components, which are described in detail here due to their bearing on experiment setups.  The experimental methodology is also described here, which points out the elements that influence the results of the experiments.
 
 \section{The Experimental Test Fixture}\label{sec:robotic_vehicle}
-To facilitate the latency reduction experiments and the three dimensional mapping experiments several robotic test vehicles were constructed.  All of the robotic vehicles had some similar components and used similar navigation techniques and software.  Each robotic vehicle was equipped with a Sick LMS151 LiDAR which provided two dimensional data about the environment and wheel encoders which were integrated over time to provide odometry measurements.  Additionally, each vehicle combined the LiDAR data with the wheel odometry using SLAM to provide an accurate indoor navigation solution.  Though configurations for the wheel odometry and SLAM algorithm differed between vehicles, each vehicle used similar setups to provide accurate two dimensional poses of the robot indoors.
+To facilitate the latency reduction experiments and the three dimensional mapping experiments several robotic test vehicles were constructed.  All of the robotic vehicles had some similar components and used similar navigation techniques and software.  Each robotic vehicle was equipped with a Sick LMS151 LiDAR which provided two dimensional data about the environment and wheel encoders which were integrated over time to provide odometry measurements.  Additionally, each vehicle combined the LiDAR data with the wheel odometry using SLAM\cite{grisetti2007improved}\cite{grisettiyz2005improving} to provide an accurate indoor navigation solution.  Though configurations for the wheel odometry and SLAM algorithm differed between vehicles, each vehicle used similar setups to provide accurate two dimensional poses of the robot indoors.
 
-Each vehicle also provides three dimensional data about the environment using one of the RGB-D camera systems available, like the Microsoft Kinect or the ASUS Xtion Live Pro.  Early experiments and data sets used the Microsoft Kinect as the three dimensional data source, but the final system is using the ASUS Xtion Pro Live instead.  The ASUS Xtion Pro Live is used now due to its hardware image registration and simpler power requirements.  One other advantage to the ASUS Xtion Pro Live is that it is smaller, lighter, and easier to mount that the Kinect, which made adjusting and calibrating the sensor much simpler.
+Each vehicle also provides three dimensional data about the environment using one of the RGB-D camera systems available, like the Microsoft Kinect or the ASUS Xtion Live Pro.  Early experiments and data sets used the Microsoft Kinect as the three dimensional data source, but the final system tests used the ASUS Xtion Pro Live.  This due to the ASUS Xtion Pro Live hardware image registration and simpler power requirements.  One other advantage to the ASUS Xtion Pro Live is that it is smaller, lighter, and easier to mount that the Kinect, which made adjusting and calibrating the sensor much simpler.
 
 \subsection{SegwayRMP 200}
 Though there are many similarities in the different robotic vehicle test fixtures, the hardware configuration of each differed significantly.  There have been three robotic vehicle platforms during the course of this research.  The first system was based on a Segway RMP200 ATV platform.  This robotic vehicle had a Mac Mini with a 2.6GHz Core 2 Duo processor and four gigabytes of RAM.  The sensor package consisted of a Sick LMS151, wheel odometry, and a Microsoft Kinect.  This platform was electrically damaged a few months into the research and new platform had to be pursued.  Only a small amount of data collected with machine was used in the final research, but it served as a learning platform when the first proof of concepts for this work were underway.  Additionally, a software artifact in the form of the library `libsegwayrmp' resulted from this part of the work.  The library is middleware agnostic, i.e. not ROS or MOOS specific, and is in use at as many as ten different institutes outside of Auburn to date.  The hardware configuration of the Segway RMP200 vehicle can be seen in Figure \ref{fig:segway_rmp200}.
@@ -487,7 +490,7 @@ The second robotic vehicle used as the test fixture was to be an iRobot ATRV, bu
 \end{figure}
 
 \subsection{iRobot ATRV}
-The final robotic vehicle used as the test fixture is based on an iRobot ATRV.  This roboti vehicle is used in the latency reduction trials and is to be the basis for future work.  The ATRV is equipped with the Sick LMS151, high resolution wheel encoders, the Microsoft Kinect and the ASUS Xtion Pro Live.  The higher resolution encoders provided a much better pose estimate between SLAM updates, resulting in much better results during mapping.  The option of using the ASUS Xtion Pro Live also allowed more flexibility on adjusting the mounting and less processing while registering the color image to the three dimensional data.  The ATRV and its configuration for the latency reduction trials can be seen in Figure \ref{fig:atrv}.
+The final robotic vehicle used as the test fixture is based on an iRobot ATRV.  This robotic vehicle is used in the latency reduction trials and is to be the basis for future work.  The ATRV is equipped with the Sick LMS151, high resolution wheel encoders, the Microsoft Kinect and the ASUS Xtion Pro Live.  The higher resolution encoders provided a much better pose estimate between SLAM updates, resulting in much better results during mapping.  The option of using the ASUS Xtion Pro Live also allowed more flexibility on adjusting the mounting and less processing while registering the color image to the three dimensional data.  The ATRV and its configuration for the latency reduction trials can be seen in Figure \ref{fig:atrv}.
 
 \begin{figure}[ht]
   \centering
@@ -497,9 +500,9 @@ The final robotic vehicle used as the test fixture is based on an iRobot ATRV.  
 \end{figure}
 
 \subsection{Software}
-In addition to the robotic vehicle hardware and device interface software, there exists several software components and artifacts which were created to allow the test fixture to perform the planned experiments.  All of the robotic platforms used very similar software.  The middleware used on all of the robotic platforms was ROS, the Robotics Operating System\cite{quigley2009ros}.  ROS provides a build system, code organization tools, inter process communication, standard data types common in robotics, debugging tools, visualization tools, implementations of common algorithms, and a large open community.  Because of the common ground provided by ROS and its tools, many software packages were available to speed up the development of the robotic platforms.  For example, the ROS community provides drivers for common hardware, some of which was used on the test fixtures.  ROS provides an complete and efficient interface to RGB-D sensors like the Microsoft Kinect and ASUS Xtion Pro Live.  Additionally, the message passing conventions and tools provided by ROS makes it very easy to abstract components of the system in a manner described in the chapter on System Design.  Because of the well defined interfaces and decoupling of the software components, the mapping system can use data from either the ASUS Xtion Pro Live or the Microsoft Kinect with absolutely no changes to the source code.  With drivers for the RGB-D sensors and tight integration with perception libraries like octomap and PCL, ROS was the best engineering decision for the robotic platform and this work.
+In addition to the robotic vehicle hardware and device interface software, there exists several software components and artifacts which were created to allow the test fixture to perform the planned experiments.  All of the robotic platforms used very similar software.  The middleware used on all of the robotic platforms was ROS, the Robotics Operating System\cite{quigley2009ros}.  ROS provides a build system, code organization tools, inter process communication, standard data types common in robotics, debugging tools, visualization tools, implementations of common algorithms, and a large open community.  Because of the common ground provided by ROS and its tools, many software packages were available to speed up the development of the robotic platforms.  For example, the ROS community provides drivers for common hardware, some of which was used on the test fixtures.  ROS provides an complete and efficient interface to RGB-D sensors like the Microsoft Kinect and ASUS Xtion Pro Live.  Additionally, the message passing conventions and tools provided by ROS makes it very easy to abstract components of the system in a manner described in Chapter \ref{chap:system_design}.  Because of the well defined interfaces and decoupling of the software components, the mapping system can use data from either the ASUS Xtion Pro Live or the Microsoft Kinect with absolutely no changes to the source code.  With drivers for the RGB-D sensors and tight integration with perception libraries like octomap and PCL, ROS was the best engineering decision for the robotic platform and this work.
 
-Working with ROS involves several software tasks like wrapping drivers in ROS code, describing the robot's geometry in the Unified Robot Description Format (URDF), and drawing a model of the robot in blender for use in the teleoperation visualization, see Figure \ref{fig:atrv_blender}.
+Working with ROS involves several software tasks like wrapping drivers in ROS code, describing the robot's geometry in the Unified Robot Description Format (URDF), and drawing a model of the robot in blender for use in the teleoperation visualization, as shown in Figure \ref{fig:atrv_blender}.
 
 \begin{figure}[ht]
   \centering
@@ -508,11 +511,11 @@ Working with ROS involves several software tasks like wrapping drivers in ROS co
   \label{fig:atrv_blender}
 \end{figure}
 
-The approach for writing hardware interfacing software, or drivers, and other programs in ROS is to make an agnostic library with a thin layer of ROS specific code around it, often called a wrapper.  This design pattern allows the majority of the code to remain agnostic of the middleware, so if there is a need to move to another middleware or to a monolithic system on a micro-controller or in a product, then it can be easily done.  The geometry of the robot is described in a generic format called the URDF.  Once the robot was setup with a URDF and all of the hardware interfaces were working, the vehicle was ready to have its sensors visualized and recorded.  Using rviz the sensors on the vehicle can be visualize because they all adhere to the common data types defined by the ROS community.  
+The approach for writing hardware interfacing software, or drivers, and other programs in ROS is to make an agnostic library with a thin layer of ROS specific code around it, often called a wrapper.  This design pattern allows the majority of the code to remain agnostic of the middleware, allowing software to move to another middleware or to a monolithic system on a micro-controller or in a product, if needed.  The geometry of the robot is described in a generic format called the URDF.  Once the robot was setup with a URDF and all of the hardware interfaces were working, the vehicle was ready to have its sensors visualized and recorded.  Using rviz, the sensors on the vehicle can be visualize because they all adhere to the common data types defined by the ROS community.  
 
 In addition to the message passing between programs and data visualization, the logging system needed to be able to keep up with the Kinect and laser data.  The Kinect, and similar sensors, produce significant amounts of data and the logging system would need to be very efficient in order to keep up with the high data rates.  Table \ref{tab:kinect_data} shows how much data is produces by the Kinect at different resolutions.
 
-\begin{table}
+\begin{table}[h]
 \caption{Bandwidth of Raw Kinect Data at Different Resolutions}
 \label{tab:kinect_data}
 \begin{center}
@@ -528,7 +531,7 @@ In addition to the message passing between programs and data visualization, the 
 \end{center}
 \end{table}
 
-These rates are recorded on a live running system can be effected by the amount depth map pixels that can be converted to points and the data rate.  The number of points converted from the depth map can change due to the effects of some scenes, where a close object shadows other objects in the room obstructing them.  The data rate can fall from the maximum thirty hertz if the system is over taxed or if data is purposely dropped to reduce processing costs.  Even with these reductions in the amount of information, recording the all of the sensors on the robotic vehicle system results in log files that are two to four gigabytes per minute in size.
+The rates in \ref{tab:kinect_data} are empirical because the actual rate can be effected by the scene being imaged.  The number of points converted from the depth map can change due to the effects of some scene configurations, for example where a close object shadows other objects in the room obstructing them from the point cloud data.  The data rate can fall from the maximum thirty hertz if the system is over taxed or if data is purposely dropped to reduce processing costs.  Even with these reductions in the amount of information, recording all of the sensors on the robotic vehicle system results in log files that are two to four gigabytes per minute in size.
 
 These software components together enable a test fixture that can reliably execute commands and collect data for the three dimensional mapping and latency reduction trials.  Having a stable and well designed test fixture and test implementations are a crucial component to enabling this research to move forward.
 
@@ -540,7 +543,7 @@ These software components together enable a test fixture that can reliably execu
 \end{figure}
 
 \section{Three Dimensional Mapping Experiments}
-The experiments to ensure that the three dimensional mapping system take the form of acceptance testing.  Acceptance testing is simply running the software manually over a give set of inputs and manually examining the results.  Due to the fact that mapping system can be run off recorded data sets, i.e. there is no closed loop from the teleoperator, the mapping system can also be tested against recorded data sets.  Using the flexibility of recorded data sets, a series of acceptance tests were devised using select data sets which were known to cause problems or errors in the mapping process.  These acceptance tests are executed by simply running the mapping system over each of the previously selected data sets and visually examining the results.  The results can be affected by changes in the mapping system or by changes in the navigation system of the robot.  Therefore data contained in the test data sets contain all of the data needed to recompute the navigation solution off-line.  Recomputing the navigation solution with different parameters allowed the mapping system to be tested under different noise and error conditions without rerunning the robot under different settings.  Figure \ref{fig:mapping_trashcan} shows the results from one of the three dimensional mapping acceptance tests, with the three dimensional map above the SLAM map on the left, and an image of the scene from a color camera on the right.
+The experiments, which are responsible for validating the three dimensional mapping system, take the form of acceptance tests.  Acceptance testing is simply running the software manually over a give set of inputs and manually examining the results.  Due to the fact that mapping system can be run off recorded data sets, i.e. there is no closed loop from the teleoperator, the mapping system can also be tested against recorded data sets.  Using the flexibility of recorded data sets, a series of acceptance tests were devised using select data sets which were known to cause problems or errors in the mapping process.  These acceptance tests are executed by simply running the mapping system over each of the previously selected data sets and visually examining the results.  The results can be affected by changes in the mapping system or by changes in the navigation system of the robot.  Therefore data contained in the test data sets contain all of the data needed to recompute the navigation solution off-line.  Recomputing the navigation solution with different parameters allowed the mapping system to be tested under different noise and error conditions without rerunning the robot under different settings.  Figure \ref{fig:mapping_trashcan} shows the results from one of the three dimensional mapping acceptance tests, with the three dimensional map above the SLAM map on the left, and an image of the scene from a color camera on the right.
 
 In addition to testing the three dimensional mapping portion of the overall system, these acceptance tests provide an opportunity to test parts of the teleoperation system like the transmission of the maps between computers.  Figure \ref{fig:map_bandwidth} shows some statistics about the bandwidth required to transmit the map over the network during one of the test data sets.
 
@@ -551,8 +554,10 @@ In addition to testing the three dimensional mapping portion of the overall syst
   \label{fig:map_bandwidth}
 \end{figure}
 
+In Figure \ref{fig:map_bandwidth} the bandwidth limit was set to infinity, setting no constraint on the bandwidth usage over a period of time.  If a bandwidth constraint were to be placed on the synchronization system, then when the amount of data being sent divided by the synchronization period is greater than the constraint limit, a down-sampled version of the map differences would be sent.  This down-sampling action is made very efficient because of the nature of octrees.  Because the down-sample changes are united with both the client map on the teleoperator computer and the vehicle computer subsequent iterations of the synchronization process will send the high resolution differences at a later date.  Looking at the data in Figure \ref{fig:map_bandwidth}, the large peaks correspond with periods when the vehicle is mapping new areas.  When new areas are being mapped for the first time the map must be expanded and a lot of newly occupied cells are transmitted in the changes.  Conversely, when the vehicle is traveling though areas it has been before the amount of bandwidth consumed is reduced resulting in periods of low bandwidth usage.
+
 \section{Latency Reduction Trials}\label{sec:latency_reduction_trials}
-In order to measure the effectiveness of the latency reduction techniques described in Chapter \ref{chap:latency_reduction}, a series of trials are performed and recorded.  The purpose of these trials is to show the effect of latency on the teleoperators, and the improvement of teleoperation when using the three dimensional map and predictive vehicle model.  These trials involved driving the vehicle under varying teleoperation setups with varying latencies induced on the system.  A test course was setup in and around the lab to try and have a repeatable, short, and challenging environment to test the teleoperators against.  Figure \ref{fig:latency_reduction_map} shows the path the vehicle takes during the trials.
+In order to measure the effectiveness of the latency reduction techniques described in Chapter \ref{chap:latency_reduction}, a series of trials are performed and recorded.  The purpose of these trials is to show the effect of latency on the teleoperators, and the improvement of teleoperation when using the three dimensional map and a predictive vehicle model.  These trials involved driving the vehicle under varying teleoperation setups with varying latencies induced on the system.  A test course was setup in and around the lab to try and have a repeatable, short, and challenging environment to test the teleoperators against.  Figure \ref{fig:latency_reduction_map} shows the path the vehicle takes during the trials.
 
 \begin{figure}[ht]
   \centering
@@ -561,11 +566,11 @@ In order to measure the effectiveness of the latency reduction techniques descri
   \label{fig:latency_reduction_map}
 \end{figure}
 
-The vehicle begins in the lab, at its charging station, where it can be seen in the bottom left corner of Figure \ref{fig:latency_reduction_map}.  The teleoperator must rotate the vehicle and drive the length of the lab and exit through the door into the hallway.  In the raw trial data in Appendix 1 that stretch of the course is referred to as `Segment 1'.  `Segment 2' is the vehicle traveling from the door frame to the obstacle in the hallway, seen at the top of the path in Figure \ref{fig:latency_reduction_map}.  `Segment 3' is part of the course where the vehicle is maneuvering around the obstacle and ends when the vehicle has cleared the left side of the obstacle and is returning to the door.  The final segment, `Segment 4' is the vehicle traveling from the obstacle in the hall back through the door of the lab.  Finally the total time is marked when the vehicle is back where it started next to the charging station in the lab.  In addition to times the number of hits or potential hits of the vehicle are recorded.  A hit is counted as any time the vehicle touches an obstacle or wall along the course.  Additionally, the safety person following the vehicle while it is traversing the course will notify the teleoperator if they about to strike something, which is also counted as a strike.  Figure \ref{fig:latency_reduction_map} also shows the location of the teleoperator during the trials.  The position of the teleoperator prevents them from having visual contact with the vehicle at any point during the trial.  The teleoperator is using a workstation which is running the teleoperation visualization software and that is equipped with a gamepad for driving the vehicle.  
+The vehicle begins in the lab, at its charging station, where it can be seen in the bottom left corner of Figure \ref{fig:latency_reduction_map}.  The teleoperator must rotate the vehicle and drive the length of the lab and exit through the door into the hallway.  In the raw trial data in Appendix \ref{chap:latency_results} that stretch of the course is referred to as `Segment 1'.  `Segment 2' is the vehicle traveling from the door frame to the obstacle in the hallway, seen at the top of the path in Figure \ref{fig:latency_reduction_map}.  `Segment 3' is part of the course where the vehicle is maneuvering around the obstacle and ends when the vehicle has cleared the left side of the obstacle and is returning to the door.  The final segment, `Segment 4' is the vehicle traveling from the obstacle in the hall back through the door of the lab.  Finally the total time is marked when the vehicle is back where it started next to the charging station in the lab.  In addition to travel times the number of hits or potential hits of the vehicle are recorded.  A hit is counted as any time the vehicle touches an obstacle or wall along the course.  Additionally, the safety person following the vehicle while it is traversing the course will notify the teleoperator if they about to strike something, which is also counted as a strike.  Figure \ref{fig:latency_reduction_map} also shows the location of the teleoperator during the trials.  The position of the teleoperator prevents them from having visual contact with the vehicle at any point during the trial.  The teleoperator is using a workstation which is running the teleoperation visualization software and that is equipped with a gamepad for driving the vehicle.  
 
-For each run of the trials, the conditions are different.  There are three different latency settings and three different teleoperation setups used in the trials.  The three teleoperation setups are: front facing camera only, camera and three dimensional map, and camera, three dimensional map, and predictive vehicle model.  For each teleoperation setup three different latencies are used: no latency, one second round trip time, and two second round trip time.  This totals in nine permutations for the trials, but since running the predictive vehicle model with no latency has no effect that particular permutation is ignored, resulting in eight total runs by each teleoperator.  To try and curb any learning bias or progression bias, the teleoperators are given the different scenarios in random order.  Before the trials begin the teleoperators are given a test loop around the test course so that they can become familiar with the teleoperation system and the controls of vehicle.  Additionally, the three dimensional map is reset for each consecutive run.
+For each run of the trials, the conditions are different.  There are three different latency settings and three different teleoperation setups used in the trials.  The three teleoperation setups are: front facing camera only, camera and three dimensional map, and camera, three dimensional map, and predictive vehicle model.  For each teleoperation setup three different latencies are used: no latency, one second round trip time, and two second round trip time.  This totals to nine permutations for the trials, but since running the predictive vehicle model with no latency has no effect that particular permutation is ignored, resulting in eight total runs by each teleoperator.  To try and curb any learning bias or progression bias, the teleoperators are given the different scenarios in random order.  Before the trials begin the teleoperators are given a test loop around the test course so that they can become familiar with the teleoperation system and the controls of vehicle.  Additionally, the three dimensional map is reset for each consecutive run.
 
-It should be noted that the teleoperator, in the case of three dimensional map and three dimensional map with predictive vehicle model, only had access to the three dimensional map and the position of the vehicle.  Figure \ref{fig:latency_reduction_map} shows the three dimensional map and the SLAM map, which is not available to the teleoperators, because it is a by product of the navigation solution.  On an outdoor vehicle the SLAM map may not be available, therefore it was excluded from the data presented to the teleoperator.
+It should be noted that the teleoperator, in the case of three dimensional map and three dimensional map with predictive vehicle model, only had access to the three dimensional map and the position of the vehicle.  Figure \ref{fig:latency_reduction_map} shows the three dimensional map and the SLAM map, which is not available to the teleoperators, because it is a by product of the navigation solution.  On an outdoor vehicle, the SLAM map may not be available, therefore it was excluded from the data presented to the teleoperator.
 
 \begin{figure}[ht]
   \centering
@@ -576,7 +581,7 @@ It should be noted that the teleoperator, in the case of three dimensional map a
 
 Figure \ref{fig:3d_map_doorway} shows a more typical view for the teleoperator on the left and a camera picture of the vehicle passing through the same doorway on the right.  The setup on the left is the three dimensional map only, no predictive vehicle model, but is properly lacking the two dimensional SLAM map as described above.
 
-The complete results of the latency reduction trials are listed in Appendix 1, but Figure \ref{fig:trial_times} shows the average times for each of the trial scenarios.
+The complete results of the latency reduction trials are listed in Appendix 1.  Figure \ref{fig:trial_times} shows the average times for each of the trial scenarios.
 
 \begin{figure}[ht]
   \centering
@@ -594,27 +599,27 @@ Figure \ref{fig:trial_hits} shows the average number of hits, actual and near hi
   \label{fig:trial_hits}
 \end{figure}
 
-The above figures are averages of the results from the trials, but the individual teleoperators varied considerably, as some teleoperators were cautious and others were aggressive, causing different ratios of times to hits for each teleoperator.  In addition to differences in style, the teleoperators differed considerably in overall skill.  Some teleoperators outperformed their peers in both time and number of hits.  Consistency in the teleoperators was also a problem, where some results departed from what was common place due to getting stuck at a particular part or by getting lucky with avoiding an obstacle.  All of these problems and the problem of teleoperators improving through learning can be diminished with larger sample sizes.
+Figures \ref{fig:trial_times} and \ref{fig:trial_hits} are averages over the five sets of results from the trials, but the individual teleoperators varied considerably. as some teleoperators were cautious and others were aggressive, causing different ratios of times to hits for each teleoperator.  In addition to differences in style, the teleoperators differed considerably in overall skill.  Some teleoperators outperformed their peers in both time and number of hits.  Consistency in the teleoperators was also a problem, where some results departed from what was common place due to getting stuck at a particular part or by getting lucky with avoiding an obstacle.  All of these problems and the problem of teleoperators improving through learning can be diminished with larger sample sizes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter: Conclusions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Conclusion}\label{chap:conclusion}
-This thesis has shown that three dimensional maps of the environment can be constructed using novel three dimensional sensors like the Microsoft Kinect and ASUS Xtion Pro Live, and that applying those maps to aid in teleoperation can make improvements in teleoperation speed and accuracy.  Furthermore, this thesis work has shown that latency can cause teleoperation activities to slow down and become more error prone, and that using a vehicle model can help reduce the effects of latency.  The predictive vehicle model is especially useful in high latency systems, but would also be useful in faster moving systems with moderate latency.
+This thesis has shown that three dimensional maps of the environment can be constructed using novel three dimensional sensors like the Microsoft Kinect and ASUS Xtion Pro Live, and that applying those maps to aid in teleoperation can make improvements in teleoperation speed and accuracy.  Furthermore, this thesis work has shown that latency can cause teleoperation performance to slow down and become more error prone, and that using a vehicle model can help reduce the effects of latency.  The predictive vehicle model is especially useful in high latency systems, but would also be useful in faster moving systems with moderate latency.
 
-From discussions with the teleoperators from the latency reduction trials and from the data results of the latency reduction trials some conclusions can be drawn, and other speculations made.  From the results and watching the teleoperators it is obvious that latency, especially high amounts of latency are extremely detrimental to teleoperation.  There is a relationship between the amount of tolerable latency and the speed of the vehicle.  Since the robotic test vehicle was relatively slow, about one meter per second, a larger amount of latency was tolerable.  Latencies of 500 milliseconds RTT were scarcely different from no latency on the ATRV, but if the vehicle traveled faster, say 5 meters per second, then 500 milliseconds of latency RTT might not be acceptable.
+From discussions with the teleoperators that performed the latency reduction trials and from the data results of the latency reduction trials some conclusions can be drawn, and other speculations made.  From the results and watching the teleoperators it is obvious that latency, especially high amounts of latency are extremely detrimental to teleoperation.  There is a relationship between the amount of tolerable latency and the speed of the vehicle.  Since the robotic test vehicle was relatively slow, about one meter per second, a larger amount of latency was tolerable.  Latencies of 500 milliseconds RTT were scarcely different from no latency on the ATRV, but if the vehicle traveled faster, say 5 meters per second, then 500 milliseconds of latency RTT might not be acceptable.
 
-The consensus amongst the latency reduction trial teleoperators was that the thee dimensional map of the environment was most useful when navigating tight obstacles like the doorway.  With only a camera it was difficult to navigate near obstacles which had fallen out of the field of view of the camera.  For instance the doorway was difficult unless you lined up perfectly before driving through with only the camera.  With the three dimensional map the teleoperator has some notion of where the vehicle is in relation to obstacles on the sides or the behind of the vehicle.  This helps to adjust the course of the vehicle when near obstacles that are not in front of the vehicle.
+The consensus amongst the latency reduction trial teleoperators was that the thee dimensional map of the environment was most useful when navigating tight obstacles like the doorway.  With only a camera it was difficult to navigate near obstacles which had fallen out of the field of view of the camera.  For instance the doorway was difficult unless you lined up perfectly before driving through with only the camera.  With the three dimensional map the teleoperator has some notion of where the vehicle is in relation to obstacles on the sides of the vehicle or behind the vehicle.  This helps to adjust the course of the vehicle when near obstacles that are not in front of the vehicle.
 
-A trend in the data suggests, however, that the teleoperators were faster using just the camera.  The theory here is that without additional spatial information the teleoperator has to just go through or past obstacles somewhat blindly.  When the three dimensional data is available the teleoperators are more careful when navigating obstacles, constantly adjusting the three dimensional camera to check if the vehicle is clearing the obstacles.  Though the data suggests that less obstacles are hit when using the three dimensional map and predictive vehicle model, the teleoperators do not produce perfect, hit free runs even with the assistance.  Sometimes when errors in the mapping system would occur and produce incorrect maps, the teleoperators would make errors, so some of the hits during three dimensional assisted trials might be due to problems with the mapping system.
+A trend in the data suggests, however, that the teleoperators were faster using just the camera.  The theory here is that without additional spatial information the teleoperator has to just go through or past obstacles somewhat blindly.  When the three dimensional data is available the teleoperators are more careful when navigating obstacles, constantly adjusting the three dimensional camera to check if the vehicle is clearing the obstacles.  If there was an automatted method for selecting the best camera angle, some time could be saved.  Though the data suggests that less obstacles are hit when using the three dimensional map and predictive vehicle model, the teleoperators do not produce perfect, hit free runs even with the assistance.  Sometimes when errors in the mapping system would occur and produce incorrect maps, the teleoperators would make errors, so some of the hits during three dimensional assisted trials might be due to problems with the mapping system.
 
 Some of the teleoperators did not find the predictive vehicle model to be consciously useful, but there seemed to be less over shooting when turning in place and the teleoperators moved forward with more confidence when they had the predictive vehicle model.  There seemed to be a subconscious improvement from the predictive vehicle model, allowing for more confident movement and longer spurts of movement as well.  Some teleoperators, however, found the predictive vehicle model very useful and preformed much better with it than without it.  Especially when turning in place and when making fast short linear movements.  Another important aspect of the predictive vehicle model is that it gives instant visual feedback to the teleoperator's input to the gamepad.  Without the immediate visual feedback, the teleoperators actions become mentally decoupled with the perceived robot movement, which is pointed out in the the work from Huber, et. al. at Carnegie Mellon University\cite{photo_real}.
 
-The predictive vehicle model did not perfectly match the motion of the robotic vehicle in all cases.  The linear displacement of the model matched that of the vehicle fairly well, but the in place turning estimate was less accurate.  This due, in part, to the fact that the ATRV does not perfectly execute the commanded angular velocity.  For example, when the vehicle is commanded zero linear velocity and 0.2 angular velocity, the ATRV might turn in place at 0.1 angular velocity.  This causes a discrepancy in the predicted and actual change in heading.  The heading error and other errors could be alleviated in two different fashions.  The robotic vehicle could be made to follow commanded velocities better by integrating a yaw rate observation into the closed loop controller.  Alternatively, the vehicle model could be augmented with elements that properly describe the disparity of the commanded and actual velocities.
+The predictive vehicle model did not perfectly match the motion of the robotic vehicle in all cases.  The linear displacement of the model matched that of the vehicle fairly well, but the in place turning estimate was less accurate.  This is due, in part, to the fact that the ATRV does not perfectly execute the commanded angular velocity.  For example, when the vehicle is commanded zero linear velocity and 0.2 angular velocity, the ATRV might turn in place at 0.1 angular velocity.  This causes a discrepancy in the predicted and actual change in heading.  The heading error and other errors could be alleviated in two different fashions.  The robotic vehicle could be made to follow commanded velocities better by integrating a yaw rate observation into the closed loop controller.  Alternatively, the vehicle model could be augmented with elements that properly describe the disparity of the commanded and actual velocities.
 
 \section{Future Work}
-This thesis work shows the viability of a system that produces a three dimensional map and that the map and other latency reducing techniques can be successfully applied to the teleoperation activities.  However, the mapping process is far from perfect, the evidence of the improvement to teleoperation is incomplete, and the scope of the experiments narrow.  Future work could cover much of what is missing in this work.
+This thesis work shows the viability of a system that produces a three dimensional map and that the map and other latency reducing techniques can be successfully applied to the teleoperation activities.  However, the mapping process is far from perfect, the evidence of the improvement to teleoperation is incomplete, and the scope of the experiments narrow, all of which could be enhanced by the following additional research.
 
 \subsection{Improved Mapping}
 Three dimensional mapping is a hot field of study at the moment and many alternative methods for producing three dimensional maps in real time are still being developed as of the writing of this thesis.  Some examples of this have been mentioned already in this thesis, like the KinectFusion work that has been going on in the past year\cite{izadi2011kinectfusion}.  Such technologies could make three dimensional maps with much high fidelity and accuracy, increasing their impact on the teleoperator's ability to control vehicles in tight obstacle configurations.  Another aspect of the mapping system that could be improved is the robotic vehicle's navigation solution, which directly affects the resulting map quality.  A different navigation system or a more tightly integrated system might offer better results.
@@ -643,7 +648,7 @@ The results of the latency reduction techniques are interesting, but incomplete.
 
 \appendix
 \chapter*{Appendices\addcontentsline{toc}{chapter}{Appendices}}
-\chapter{Latency Reduction Trials Results}
+\chapter{Latency Reduction Trials Results}\label{chap:latency_results}
 
 The tables that follow contain the raw timings for the latency reduction trials.  Each trial consists of eight trips around the trial course with different latencies and teleoperation setups.  The segments are points through out the trial course.  The number of hits are counted as the number of times the vehicle struck or was going to strike an obstacle or wall of the trial course.
 
@@ -866,6 +871,125 @@ The tables that follow contain the raw timings for the latency reduction trials.
   \end{tabular}
 \end{center}
 \end{table}
+
+\chapter{ATRV User Guide}
+
+The purpose of this appendix is to aid future researchers whom want to use the this thesis work as the basis of new research or to perform more trials.
+
+\section{Installation}
+Before `installation' of the thesis work, the dependencies must be met on both the teleoperator computer and the robotic vehicle computer.
+
+\subsection{Install the Robotic Operating System}
+The build system, communications, and many of the tools that support this thesis are in the ROS ecosystem and so ROS must be installed.  Current installation instructions can always be found at \url{http://www.ros.org/wiki/ROS/Installation}.  The thesis work is known to work with ROS Fuerte on Ubuntu Linux, and that is the recommended system configuration for both the teleoperator computer and the robotic vehicle computer.  ROS will include the PCL library which is used in this work.
+
+\subsection{Install Octomap Libraries}
+The required Octomap libraries are split into a few different packages.  The octomap library is a stand alone library which is hosted at \url{http://octomap.sourceforge.net/}.  In addition to the base octomap library, there are some octomap related ROS stacks which provide tools for using octomap in ROS: \href{http://ros.org/wiki/octomap\textunderscore{}mapping}{octomap\textunderscore{}mapping}, \href{http://ros.org/wiki/octomap\textunderscore{}msgs}{octomap\textunderscore{}msgs}, and \href{http://ros.org/wiki/octomap\textunderscore{}ros}{octomap\textunderscore{}ros}.  On Ubuntu Linux and using ROS Fuerte, the required octomap libraries can be installed via `apt-get':
+
+\begin{verbatim}
+sudo apt-get install ros-fuerte-octomap-ros
+sudo apt-get install ros-fuerte-octomap-mapping
+sudo apt-get install ros-fuerte-octomap-msgs
+\end{verbatim}
+
+\subsection{Setting up Robotic Vehicle Computer}
+First setup a ROS workspace.  A ROS workspace is a folder which contains one or more ROS `stacks' which contain one or more ROS `packages'.  The ROS workspace makes it easy to add different ROS `stacks' to your environment and define and resolve dependencies between ROS `stacks' and `packages'.  See \url{http://www.ros.org/wiki/ROS/Introduction} for more information on generic ROS concepts like `stacks' and `packages'.  For more information about ROS workspaces see: \url{http://www.ros.org/wiki/rosws}.  Create a ROS workspace with the following commands:
+
+\begin{verbatim}
+mkdir ~/3d_teleop_ws
+rosws init ~/3d_teleop_ws /opt/ros/fuerte
+cd ~/3d_teleop_ws
+source setup.bash
+\end{verbatim}
+
+The above commands assume that the workspace is being setup in the `~/3d\textunderscore{}teleop\textunderscore{}ws' folder and that the current ROS version is Fuerte and that it is located at `/opt/ros/fuerte'.  Change these values if that is not the case.
+
+Next add the necessary ROS `stacks' to the workspace.  First add the stacks required to run the ATRV by merging the ATRV `rosinstall' file into the workspace with these commands:
+
+\begin{verbatim}
+rosws merge https://raw.github.com/GAVLab/gavlab_atrv/master/gavlab_atrv.rosinstall
+\end{verbatim}
+
+Next add the stacks required for the three dimensional teleoperation server:
+
+\begin{verbatim}
+rosws merge https://raw.github.com/wjwwood/3d_teleop/master/3d_teleop.rosinstall
+\end{verbatim}
+
+Now that all of the rosinstall files have been merged into the workspace, the stacks need to be fetched by executing rosinstall:
+
+\begin{verbatim}
+source setup.bash
+rosinstall .
+source setup.bash
+\end{verbatim}
+
+This should fetch all of the stacks into the workspace folder.  The `source setup.bash' commands ensure that any changes to the workspace have been applied to your current terminal session.  Similarly, each time you open a new terminal you will need to execute `source ~/3d\textunderscore{}teleop\textunderscore{}ws/setup.bash' in order for this workspace to be in effect.
+
+Now that everything has been fetched and the workspace has been applied to the current terminal session the source can be built:
+
+\begin{verbatim}
+rosmake teleop_server
+\end{verbatim}
+
+The above command will build the teleop\textunderscore{}server and all other ROS `packages' required to run the system.
+
+\subsection{Setting up the Teleoperator Computer}
+Begin by creating a ROS workspace:
+
+\begin{verbatim}
+mkdir ~/3d_teleop_ws
+rosws init ~/3d_teleop_ws /opt/ros/fuerte
+cd ~/3d_teleop_ws
+source setup.bash
+\end{verbatim}
+
+Add the required ROS `stacks' to the workspace:
+
+\begin{verbatim}
+rosws merge https://raw.github.com/GAVLab/gavlab_atrv/master/gavlab_atrv.rosinstall
+rosws merge https://raw.github.com/wjwwood/3d_teleop/master/3d_teleop.rosinstall
+rosws merge https://raw.github.com/wjwwood/3d_teleop_vis/master/3d_teleop_vis.rosinstall
+\end{verbatim}
+
+Update the workspace and fetch the ROS `stacks':
+
+\begin{verbatim}
+source setup.bash
+rosinstall .
+source setup.bash
+\end{verbatim}
+
+Build all required ROS `packages':
+
+\begin{verbatim}
+rosmake teleop_client
+\end{verbatim}
+
+\section{Running the System}
+Now that all the dependencies have been installed or built and the teleop client and server have been built, the system is ready to be run.
+
+\subsection{Running the Teleoperation Server}
+Start the teleop server system on the robotic vehicle computer by executing:
+
+\begin{verbatim}
+source ~/3d_teleop_ws/setup.bash
+roslaunch teleop_server teleop_server.launch
+\end{verbatim}
+
+This will run all of the hardware interfaces for the ATRV, start the navigation system including SLAM, and start the mapping program which creates the three dimensional map.
+
+\subsection{Running the Teleoperation Client}
+On the teleoperator computer run the command:
+
+\begin{verbatim}
+source ~/3d_teleop_ws/setup.bash
+roslaunch teleop_client teleop_client.launch master:=atrv
+\end{verbatim}
+
+The above commands will run the teleoperation synchronization software, launch rviz with the appropriate visual configurations, launch the dynamic reconfigure GUI which allows control of the latency settings, and will run the vehicle prediction system.  The part `master:=atrv' is indicating the DNS name of the robotic vehicle computer.  In this case the name of the computer is `atrv', but could be different.
+
+\section{Using the Teleoperation Interface}
+Now that everything is running, the first joystick on the system should be able to drive the ATRV with the left stick (if it is a gamepad).  The bottom left trigger will scale the joystick input, i.e. it is the turbo button.  In rviz, the visualization window, clicking and dragging the mouse on the three dimensional view will rotate the viewpoint.  Scrolling the mouse wheel will zoom.  A `dynamic reconfigure' window will also have appeared.  Click on the drop down menu and select `latency\textunderscore{}reduction' and the send/receive latencies will appear and can be edited in real-time to adjust the latency on the system.
 
 \end{document}
 

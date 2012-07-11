@@ -28,3 +28,4 @@
 *.pdf
 .DS*
 *.loa
+*.sublime-workspace
